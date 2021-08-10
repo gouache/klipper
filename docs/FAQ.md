@@ -103,88 +103,42 @@ Klipper는 다양한 컴퓨터에서 실행될 수 있습니다. Klipper 호스�
 
 ## 동일한 호스트 시스템에서 여러 Klipper 인스턴스를 실행할 수 있습니까?
 
-It is possible to run multiple instances of the Klipper host software,
-but doing so requires Linux admin knowledge. The Klipper installation
-scripts ultimately cause the following Unix command to be run:
+Klipper 호스트 소프트웨어의 여러 인스턴스를 실행할 수 있지만 그렇게 하려면 Linux 관리자 지식이 필요합니다. Klipper 설치 스크립트는 궁극적으로 다음 Unix 명령이 실행되도록 합니다:
 ```
 ~/klippy-env/bin/python ~/klipper/klippy/klippy.py ~/printer.cfg -l /tmp/klippy.log
 ```
-One can run multiple instances of the above command as long as each
-instance has its own printer config file, its own log file, and its
-own pseudo-tty. For example:
+각 인스턴스에 자체 프린터 구성 파일, 자체 로그 파일 및 전용 tty가 있는 한 위 명령의 여러 인스턴스를 실행할 수 있습니다. 예를 들어:
 ```
 ~/klippy-env/bin/python ~/klipper/klippy/klippy.py ~/printer2.cfg -l /tmp/klippy2.log -I /tmp/printer2
 ```
 
-If you choose to do this, you will need to implement the necessary
-start, stop, and installation scripts (if any). The
-[install-octopi.sh](../scripts/install-octopi.sh) script and the
-[klipper-start.sh](../scripts/klipper-start.sh) script may be useful
-as examples.
+만약 이런 방식으로 여러 개의 Klipper 를 사용하기를 선택하였다면 시작, 중지 및 설치 스크립트(있는 경우)를 구현해야 합니다.[install-octopi.sh](../scripts/install-octopi.sh) 스크립트와 [klipper-start.sh](../scripts/klipper-start.sh) 스크립트가 예제가 유용할 수 있습니다.
 
 ## OctoPrint를 사용해야 합니까?
 
-The Klipper software is not dependent on OctoPrint. It is possible to
-use alternative software to send commands to Klipper, but doing so
-requires Linux admin knowledge.
+Klipper 소프트웨어는 OctoPrint에 의존하지 않습니다. 대체 소프트웨어를 사용하여 Klipper에 명령을 보낼 수 있지만 그렇게 하려면 Linux 관리자 지식이 필요합니다.
 
-Klipper creates a "virtual serial port" via the "/tmp/printer" file,
-and it emulates a classic 3d-printer serial interface via that file.
-In general, alternative software may work with Klipper as long as it
-can be configured to use "/tmp/printer" for the printer serial port.
+Klipper는 "/tmp/printer" 파일을 통해 "가상 직렬 포트"를 생성하고 해당 파일을 통해 고전적인 3d 프린터 직렬 인터페이스를 에뮬레이션 합니다. 일반적으로 프린터 직렬 포트에 "/tmp/printer"를 사용하도록 구성할 수 있는 한 대체 소프트웨어가 Klipper와 함께 작동할 수 있습니다.
 
 ## 프린터를 원점으로 이동하기 전에 스테퍼를 이동할 수 없는 이유는 무엇입니까?
 
-The code does this to reduce the chance of accidentally commanding the
-head into the bed or a wall. Once the printer is homed the software
-attempts to verify each move is within the position_min/max defined in
-the config file. If the motors are disabled (via an M84 or M18
-command) then the motors will need to be homed again prior to
-movement.
+이 기능은 실수로 익스트루더를 BED 나 벽에 부딪힐 가능성을 줄이기 위함입니다. 프린터가 홈으로 이동하면 소프트웨어는 각 이동이 구성 파일에 정의된 position_min/max 내에 있는지 확인하려고 시도합니다. 모터가 비활성화된 경우(M84 또는 M18 명령을 통해)도 모터는 이동하기 전에 다시 원점 복귀해야 합니다.
 
-If you want to move the head after canceling a print via OctoPrint,
-consider changing the OctoPrint cancel sequence to do that for
-you. It's configured in OctoPrint via a web browser under:
-Settings->GCODE Scripts
+OctoPrint를 통해 인쇄를 취소한 후 헤드를 이동하려면 OctoPrint 취소 순서를 변경하는 것이 좋습니다. 설정->GCODE 스크립트 아래의 웹 브라우저를 통해 OctoPrint에서 구성됩니다.
 
-If you want to move the head after a print finishes, consider adding
-the desired movement to the "custom g-code" section of your slicer.
+인쇄가 완료된 후 헤드를 이동하려면 슬라이서의 "custom gcode" 섹션에 원하는 이동을 추가하는 것이 좋습니다.
 
-If the printer requires some additional movement as part of the homing
-process itself (or fundamentally does not have a homing process) then
-consider using a safe_z_home or homing_override section in the config
-file. If you need to move a stepper for diagnostic or debugging
-purposes then consider adding a force_move section to the config
-file. See [config reference](Config_Reference.md#customized_homing)
-for further details on these options.
+만일 프린터가 오토홈을 할때 추가적인 작업이 필요한 경우 (또는 근본적으로 오토홈 프로세스가 없는 경우) config 파일에서 safe_z_home 또는 homing_override 섹션 사용을 고려하십시오. 진단 또는 디버깅 목적으로 스테퍼를 이동해야 하는 경우 config 파일에 force_move 섹션을 추가하는 것을 고려하십시오. 이러한 옵션에 대한 자세한 내용은 [config reference](Config_Reference.md#customized_homing)을 참조를 참조하세요.
 
 ## 기본 설정에서 Z position_endstop이 0.5로 설정된 이유는 무엇입니까
 
-For cartesian style printers the Z position_endstop specifies how far
-the nozzle is from the bed when the endstop triggers. If possible, it
-is recommended to use a Z-max endstop and home away from the bed (as
-this reduces the potential for bed collisions). However, if one must
-home towards the bed then it is recommended to position the endstop so
-it triggers when the nozzle is still a small distance away from the
-bed. This way, when homing the axis, it will stop before the nozzle
-touches the bed. See the [bed level document](Bed_Level.md) for more
-information.
+직교 스타일 프린터의 경우 Z position_endstop은 엔드스톱이 트리거될 때 노즐이 BED에서 얼마나 멀리 떨어져 있는지 지정합니다. 가능하면 Z-max 엔드스톱을 사용하고 BED에서 멀리 떨어져 있는 것이 좋습니다 (이렇게 하면 BED에 충돌 가능성이 줄어듭니다). 그러나 BED를 향해 오토홈 해야 하는 경우 노즐이 BED에서 여전히 가까운 거리에 있을 때 트리거되도록 엔드스톱을 배치하는 것이 좋습니다. 이렇게 하면 축을 원점 복귀시킬 때 노즐이 BED에 닿기 전에 멈춥니다. 자세한 [bed level document](Bed_Level.md) 를 참조하십시오.
 
 ## Marlin에서 설정을 가져왔는데 X/Y 축은 잘 작동하지만 Z 축을 원점 복귀할 때 삐걱거리는 소리가 납니다
 
-Short answer: First, make sure you have verified the stepper
-configuration as described in the
-[config check document](Config_checks.md). If the problem persists,
-try reducing the max_z_velocity setting in the printer config.
+짧은 대답: 먼저 [config check document](Config_checks.md)에 설명된 대로 스테퍼 구성을 확인했는지 확인합니다. 문제가 지속되면 프린터 구성에서 max_z_velocity 설정을 줄여 보십시오.
 
-Long answer: In practice Marlin can typically only step at a rate of
-around 10000 steps per second. If it is requested to move at a speed
-that would require a higher step rate then Marlin will generally just
-step as fast as it can. Klipper is able to achieve much higher step
-rates, but the stepper motor may not have sufficient torque to move at
-a higher speed. So, for a Z axis with a high gearing ratio or high
-microsteps setting the actual obtainable max_z_velocity may be smaller
-than what is configured in Marlin.
+긴 대답: 실제로 Marlin 은 일반적으로 초당 약 10000 step 의 속도로만 움직일 수 있습니다. 더 높은 속도로 이동하도록 요청되면 Marlin은 일반적으로 최대한 가능한 정도만 수행합니다. Klipper는 훨씬 더 높은 속도를 달성할 수 있지만 스테퍼 모터는 더 높은 속도로 이동하기에 충분한 토크가 없을 수 있습니다. 따라서 높은 기어비 또는 높은 마이크로스텝이 있는 Z축의 경우 실제 얻을 수 있는 max_z_velocity를 설정하는 것이 Marlin에서 구성된 것보다 작을 수 있습니다.
 
 ## TMC 모터 드라이버가 인쇄 도중에 꺼집니다
 
