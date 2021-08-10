@@ -165,148 +165,59 @@ AVR 부트로더의 일부 이전 버전에는 워치독 이벤트 처리에 알
 
 ## Raspberry Pi가 비정상 종료하면 히터가 켜져 있습니까?
 
-The software has been designed to prevent that. Once the host enables
-a heater, the host software needs to confirm that enablement every 5
-seconds. If the micro-controller does not receive a confirmation every
-5 seconds it goes into a "shutdown" state which is designed to turn
-off all heaters and stepper motors.
+호스트 소프트웨어는 이를 방지하도록 설계되었습니다. 호스트가 히터를 활성화하면 소프트웨어는 5초마다 활성화를 확인해야 합니다. 마이크로 컨트롤러가 5초마다 확인 메시지를 받지 못하면 모든 히터와 스테퍼 모터를 끄도록 설계된 "종료" 상태가 됩니다.
 
-See the "config_digital_out" command in the
-[MCU commands](MCU_Commands.md) document for further details.
+자세한 내용은 [MCU commands](MCU_Commands.md)의 "config_digital_out" 명령을 참조하십시오.
 
-In addition, the micro-controller software is configured with a
-minimum and maximum temperature range for each heater at startup (see
-the min_temp and max_temp parameters in the
-[config reference](Config_Reference.md#extruder) for details). If the
-micro-controller detects that the temperature is outside of that range
-then it will also enter a "shutdown" state.
+또한 마이크로 컨트롤러 소프트웨어는 시작 시 각 히터의 최소 및 최대 온도 범위로 제한됩니다 (자세한 내용은 [config reference](Config_Reference.md#extruder)의 min_temp 및 max_temp 매개변수 참조). 마이크로 컨트롤러가 온도가 해당 범위를 벗어난 것을 감지하면 "종료" 상태로 됩니다.
 
-Separately, the host software also implements code to check that
-heaters and temperature sensors are functioning correctly. See the
-[config reference](Config_Reference.md#verify_heater) for further
-details.
+이와 별도로 호스트 소프트웨어는 히터와 온도 센서가 올바르게 작동하는지 확인하는 코드도 구현합니다. 자세한 내용은 [config reference](Config_Reference.md#verify_heater)를 참조하세요.
 
 ## Marlin 핀 번호를 Klipper 핀 이름으로 어떻게 변환합니까?
 
-Short answer: A mapping is available in the
-[sample-aliases.cfg](../config/sample-aliases.cfg) file. Use that file
-as a guide to finding the actual micro-controller pin names. (It is
-also possible to copy the relevant
-[board_pins](Config_Reference.md#board_pins) config section into your
-config file and use the aliases in your config, but it is preferable
-to translate and use the actual micro-controller pin names.) Note that
-the sample-aliases.cfg file uses pin names that start with the prefix
-"ar" instead of "D" (eg, Arduino pin `D23` is Klipper alias `ar23`)
-and the prefix "analog" instead of "A" (eg, Arduino pin `A14` is
-Klipper alias `analog14`).
+짧은 대답: Klipper는 마이크로 컨트롤러에서 정의한 표준 핀 이름을 사용합니다. Atmega 칩에서 이러한 하드웨어 핀은 PA4, PC7 또는 PD2와 같은 이름을 갖습니다.
 
-Long answer: Klipper uses the standard pin names defined by the
-micro-controller. On the Atmega chips these hardware pins have names
-like `PA4`, `PC7`, or `PD2`.
+긴 대답: [sample-aliases.cfg](../config/sample-aliases.cfg) 파일에서 매핑을 사용할 수 있습니다. 이 파일을 실제 마이크로 컨트롤러 핀 이름을 찾는 가이드로 사용하십시오. (관련 [board_pins](Config_Reference.md#board_pins) config 섹션을 파일에 복사하고 config의 별칭을 사용할 수도 있지만 실제 마이크로 컨트롤러 핀 이름을 번역하여 사용하는 것이 좋습니다.) sample-aliases.cfg 파일에 유의하십시오. "D" 대신 접두사 "ar"로 시작하는 핀 이름을 사용하고(예: Arduino 핀 D23은 Klipper 별칭 ar23임) "A" 대신 접두사 "analog"를 사용합니다(예: Arduino 핀 A14는 Klipper 별칭 analog14임).
 
-Long ago, the Arduino project decided to avoid using the standard
-hardware names in favor of their own pin names based on incrementing
-numbers - these Arduino names generally look like `D23` or `A14`. This
-was an unfortunate choice that has lead to a great deal of confusion.
-In particular the Arduino pin numbers frequently don't translate to
-the same hardware names. For example, `D21` is `PD0` on one common
-Arduino board, but is `PC7` on another common Arduino board.
+오래 전에 Arduino 프로젝트는 증가하는 숫자를 기반으로 하는 고유한 핀 이름을 위해 표준 하드웨어 이름을 사용하지 않기로 결정했습니다. 이러한 Arduino 이름은 일반적으로 D23 또는 A14처럼 보입니다. 이것은 큰 혼란을 가져온 불행한 선택이었습니다. 특히 Arduino 핀 번호는 종종 동일한 하드웨어 이름으로 변환되지 않습니다. 예를 들어, D21은 어떤 Arduino 보드에서 PD0이지만 다른 Arduino 보드에서는 PC7입니다.
 
-To avoid this confusion, the core Klipper code uses the standard pin
-names defined by the micro-controller.
+이러한 혼동을 피하기 위해 Klipper 코어 코드는 마이크로 컨트롤러에서 정의한 표준 핀 이름을 사용합니다.
 
 ## 내 장치를 특정 유형의 마이크로 컨트롤러 핀에 연결해야 합니까?
 
-It depends on the type of device and type of pin:
+장치 유형 및 핀 유형에 따라 다릅니다:
 
-ADC pins (or Analog pins): For thermistors and similar "analog"
-sensors, the device must be wired to an "analog" or "ADC" capable pin
-on the micro-controller. If you configure Klipper to use a pin that is
-not analog capable, Klipper will report a "Not a valid ADC pin" error.
+ADC 핀(또는 아날로그 핀): 서미스터 및 유사한 "아날로그" 센서의 경우 장치를 마이크로 컨트롤러의 "아날로그" 또는 "ADC" 가능 핀에 연결해야 합니다. 아날로그를 사용할 수 없는 핀을 사용하도록 Klipper를 구성하면 Klipper는 "유효하지 않은 ADC 핀" 오류를 보고합니다.
 
-PWM pins (or Timer pins): Klipper does not use hardware PWM by default
-for any device. So, in general, one may wire heaters, fans, and
-similar devices to any general purpose IO pin. However, fans and
-output_pin devices may be optionally configured to use `hardware_pwm:
-True`, in which case the micro-controller must support hardware PWM on
-the pin (otherwise, Klipper will report a "Not a valid PWM pin"
-error).
+PWM 핀(또는 타이머 핀): Klipper는 기본적으로 모든 장치에 대해 하드웨어 PWM을 사용하지 않습니다. 따라서 일반적으로 히터, 팬 및 유사한 장치를 범용 IO 핀에 연결할 수 있습니다. 그러나 팬 및 output_pin 장치는 선택적으로 hardware_pwm: True를 사용하도록 구성할 수 있습니다. 이 경우 마이크로 컨트롤러는 핀에서 하드웨어 PWM을 지원해야 합니다(그렇지 않으면 Klipper는 "유효한 PWM 핀이 아닙니다" 오류를 보고합니다).
 
-IRQ pins (or Interrupt pins): Klipper does not use hardware interrupts
-on IO pins, so it is never necessary to wire a device to one of these
-micro-controller pins.
+IRQ 핀(또는 인터럽트 핀): Klipper는 IO 핀에서 하드웨어 인터럽트를 사용하지 않으므로 장치를 이러한 마이크로 컨트롤러 핀 중 하나에 연결할 필요가 없습니다.
 
-SPI pins: When using hardware SPI it is necessary to wire the pins to
-the micro-controller's SPI capable pins. However, most devices can be
-configured to use "software SPI", in which case any general purpose IO
-pins may be used.
+SPI 핀: 하드웨어 SPI를 사용할 때 핀을 마이크로 컨트롤러의 SPI 가능 핀에 연결해야 합니다. 그러나 대부분의 장치는 "소프트웨어 SPI"를 사용하도록 구성할 수 있으며, 이 경우 모든 범용 IO 핀을 사용할 수 있습니다.
 
-I2C pins: When using I2C it is necessary to wire the pins to the
-micro-controller's I2C capable pins.
+I2C 핀: I2C를 사용할 때 핀을 마이크로 컨트롤러의 I2C 가능 핀에 연결해야 합니다.
 
-Other devices may be wired to any general purpose IO pin. For example,
-steppers, heaters, fans, Z probes, servos, LEDs, common hd44780/st7920
-LCD displays, the Trinamic UART control line may be wired to any
-general purpose IO pin.
+다른 장치는 범용 IO 핀에 연결할 수 있습니다. 예를 들어, 스테퍼, 히터, 팬, Z 프로브, 서보, LED, 일반 hd44780/st7920 LCD 디스플레이, Trinamic UART 제어 라인은 모든 범용 IO 핀에 배선될 수 있습니다.
 
 ## M109/M190 "wait for temperature" 요청을 어떻게 취소합니까?
 
-Navigate to the OctoPrint terminal tab and issue an M112 command in
-the terminal box. The M112 command will cause Klipper to enter into a
-"shutdown" state, and it will cause OctoPrint to disconnect from
-Klipper. Navigate to the OctoPrint connection area and click on
-"Connect" to cause OctoPrint to reconnect. Navigate back to the
-terminal tab and issue a FIRMWARE_RESTART command to clear the Klipper
-error state.  After completing this sequence, the previous heating
-request will be canceled and a new print may be started.
+OctoPrint 터미널 탭으로 이동하여 터미널 상자에서 M112 명령을 실행합니다. M112 명령은 Klipper를 "종료" 상태로 만들고 OctoPrint와 Klipper의 연결을 끊습니다. OctoPrint 연결 영역으로 이동하고 "연결"을 클릭하여 OctoPrint가 다시 연결되도록 합니다. 터미널 탭으로 돌아가 FIRMWARE_RESTART 명령을 실행하여 Klipper 오류 상태를 지웁니다. 이 순서를 완료한 후 이전 가열 요청이 취소되고 새 인쇄가 시작될 수 있습니다.
 
 ## 프린터 탈조를 어떻게 알 수 있습니까?
 
-In a way, yes. Home the printer, issue a `GET_POSITION` command, run
-your print, home again and issue another `GET_POSITION`. Then compare
-the values in the `mcu:` line.
+이렇게 하면 가능합니다. 프린터를 홈으로 이동하고 `GET_POSITION` 명령을 실행하고 인쇄를 실행하고 다시 홈으로 이동하고 또 다른 `GET_POSITION`을 실행합니다. 그런 다음 `mcu:` 행의 값을 비교합니다.
 
-This might be helpful to tune settings like stepper motor currents,
-accelerations and speeds without needing to actually print something
-and waste filament: just run some high-speed moves in between the
-`GET_POSITION` commands.
+이것은 실제로 무언가를 인쇄하고 필라멘트를 낭비할 필요 없이 스테퍼 모터 전류, 가속도 및 속도와 같은 설정을 조정하는 데 도움이 될 수 있습니다. `GET_POSITION` 명령 사이에 고속 이동을 실행하기만 하면 됩니다.
 
-Note that endstop switches themselves tend to trigger at slightly
-different positions, so a difference of a couple of microsteps is
-likely the result of endstop inaccuracies. A stepper motor itself can
-only lose steps in increments of 4 full steps. (So, if one is using 16
-microsteps, then a lost step on the stepper would result in the "mcu:"
-step counter being off by a multiple of 64 microsteps.)
+엔드스톱 스위치 자체는 약간 다른 위치에서 트리거되는 경향이 있으므로 몇 가지 마이크로스텝의 차이는 엔드스톱 부정확성의 결과일 수 있습니다. 스테퍼 모터 자체는 4 full step 의 배수로 탈조 될 수 있습니다. (따라서 16개의 마이크로스텝을 사용하는 경우 스테퍼에서 손실된 스텝은 "mcu:" 스텝 카운터가 64개의 마이크로스텝의 배수만큼 떨어져 있는 결과를 낳습니다.)
 
 ## Klipper가 "I lost my print" 오류를 보고하는 이유는 무엇입니까?
 
-Short answer: We want to know if our printers detect a problem so that
-the underlying issue can be fixed and we can obtain great quality
-prints. We definitely do not want our printers to silently produce low
-quality prints.
+간단한 답변: 우리는 프린터가 문제를 감지하여 근본적인 문제를 수정하고 우수한 품질의 인쇄물을 얻을 수 있는지 알고 싶습니다. 프린터가 저품질 인쇄물을 조용히 생산하는 것을 원하지 않습니다.
 
-Long answer: Klipper has been engineered to automatically workaround
-many transient problems. For example, it automatically detects
-communication errors and will retransmit; it schedules actions in
-advance and buffers commands at multiple layers to enable precise
-timing even with intermittent interference. However, should the
-software detect an error that it can not recover from, if it is
-commanded to take an invalid action, or if it detects it is hopelessly
-unable to perform its commanded task, then Klipper will report an
-error. In these situations there is a high risk of producing a
-low-quality print (or worse). It is hoped that alerting the user will
-empower them to fix the underlying issue and improve the overall
-quality of their prints.
+긴 답변: Klipper는 많은 일시적인 문제를 자동으로 해결하도록 설계되었습니다. 예를 들어, 자동으로 통신 오류를 감지하고 재전송합니다. 사전에 작업을 예약하고 여러 계층에서 명령을 버퍼링하여 간헐적인 간섭이 있는 경우에도 정확한 타이밍을 가능하게 합니다. 그러나 소프트웨어가 복구할 수 없는 오류를 감지하거나 잘못된 조치를 취하도록 명령을 받았거나 명령받은 작업을 절망적으로 수행할 수 없음을 감지한 경우 Klipper는 오류를 보고합니다. 이러한 상황에서는 낮은 품질(또는 그 이상)의 인쇄물을 생성할 위험이 높습니다. 사용자에게 경고하면 근본적인 문제를 해결하고 인쇄물의 전반적인 품질을 개선할 수 있기를 바랍니다.
 
-There are some related questions: Why doesn't Klipper pause the print
-instead? Report a warning instead? Check for errors before the print?
-Ignore errors in user typed commands? etc? Currently Klipper reads
-commands using the G-Code protocol, and unfortunately the G-Code
-command protocol is not flexible enough to make these alternatives
-practical today. There is developer interest in improving the user
-experience during abnormal events, but it is expected that will
-require notable infrastructure work (including a shift away from
-G-Code).
+몇 가지 관련 질문이 있습니다. Klipper가 대신 인쇄를 일시 중지하지 않는 이유는 무엇입니까? 대신 경고를 보고하시겠습니까? 인쇄하기 전에 오류를 확인하시겠습니까? 사용자가 입력한 명령의 오류를 무시하시겠습니까? 등? 현재 Klipper는 gcode 프로토콜을 사용하여 명령을 읽지만 불행히도 gcode 명령 프로토콜은 오늘날 이러한 대안을 실용적으로 만들 만큼 유연하지 않습니다. 비정상적인 이벤트 발생 시 사용자 경험을 개선하는 데 개발자의 관심이 있지만 많은 인프라 작업(gcode에서 전환 포함)이 필요할 것으로 예상됩니다.
 
 ## 최신 소프트웨어로 업그레이드하려면 어떻게 합니까?
 
