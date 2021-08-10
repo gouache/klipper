@@ -142,61 +142,26 @@ OctoPrint를 통해 인쇄를 취소한 후 헤드를 이동하려면 OctoPrint 
 
 ## TMC 모터 드라이버가 인쇄 도중에 꺼집니다
 
-If using the TMC2208 (or TMC2224) driver in "standalone mode" then
-make sure to use the
-[latest version of Klipper](#how-do-i-upgrade-to-the-latest-software). A
-workaround for a TMC2208 "stealthchop" driver problem was added to
-Klipper in mid-March of 2020.
+"standalone mode"에서 TMC2208(또는 TMC2224) 드라이버를 사용하는 경우 최신 버전의 Klipper를 사용해야 합니다. TMC2208 "stealthchop" 드라이버 문제에 대한 해결 방법이 2020년 3월 중순에 Klipper에 추가되었습니다.
 
 ## 랜덤하게 "MCU와의 통신 끊김" 오류가 계속 발생합니다
 
-This is commonly caused by hardware errors on the USB connection
-between the host machine and the micro-controller. Things to look for:
-- Use a good quality USB cable between the host machine and
-  micro-controller. Make sure the plugs are secure.
-- If using a Raspberry Pi, use a
-  [good quality power supply](https://www.raspberrypi.org/documentation/hardware/raspberrypi/power/README.md)
-  for the Raspberry Pi and use a
-  [good quality USB cable](https://www.raspberrypi.org/forums/viewtopic.php?p=589877#p589877)
-  to connect that power supply to the Pi. If you get "under voltage"
-  warnings from OctoPrint, this is related to the power supply and it
-  must be fixed.
-- Make sure the printer's power supply is not being overloaded. (Power
-  fluctuations to the micro-controller's USB chip may result in resets
-  of that chip.)
-- Verify stepper, heater, and other printer wires are not crimped or
-  frayed. (Printer movement may place stress on a faulty wire causing
-  it to lose contact, briefly short, or generate excessive noise.)
-- There have been reports of high USB noise when both the printer's
-  power supply and the host's 5V power supply are mixed. (If you find
-  that the micro-controller powers on when either the printer's power
-  supply is on or the USB cable is plugged in, then it indicates the
-  5V power supplies are being mixed.) It may help to configure the
-  micro-controller to use power from only one source. (Alternatively,
-  if the micro-controller board can not configure its power source,
-  one may modify a USB cable so that it does not carry 5V power
-  between the host and micro-controller.)
+이것은 일반적으로 호스트 시스템과 마이크로 컨트롤러 간의 USB 연결에 대한 하드웨어 오류로 인해 발생합니다. 아래 사항을 점검하세요:
+- 호스트 머신과 마이크로 컨트롤러 사이에 좋은 품질의 USB 케이블을 사용하십시오. 플러그가 안전한지 확인하십시오.  
+- Raspberry Pi를 사용하는 경우 Raspberry Pi에 [good quality power supply](https://www.raspberrypi.org/documentation/hardware/raspberrypi/power/README.md)를 사용하고 [good quality USB cable](https://www.raspberrypi.org/forums/viewtopic.php?p=589877#p589877)을 사용하여 해당 전원 공급 장치를 Pi에 연결합니다. OctoPrint에서 "전압 부족" 경고가 표시되면 이는 전원 공급 장치와 관련된 것이며 수정해야 합니다.  
+- 프린터의 전원 공급 장치에 과부하가 걸리지 않았는지 확인하십시오. (마이크로 컨트롤러의 USB 칩에 대한 전력 변동으로 인해 해당 칩이 재설정될 수 있습니다.)
+- 스테퍼 모터, 히터 및 기타 프린터 와이어가 구겨지거나 닳지 않았는지 확인합니다. (프린터가 움직이면 결함이 있는 전선에 스트레스가 가해져 접촉이 끊어지거나 잠시 단락되거나 과도한 소음이 발생할 수 있습니다.)  
+- 프린터의 전원 공급 장치와 호스트의 5V 전원 공급 장치가 혼합되어 있을 때 USB 노이즈가 높다는 보고가 있었습니다. (프린터의 전원 공급 장치가 켜져 있거나 USB 케이블이 꽂혀 있을 때 마이크로 컨트롤러의 전원이 켜지면 5V 전원 공급 장치가 혼합되고 있음을 나타냅니다.) 단 하나의 소스에서 전력을 공급하는 것이 좋습니다. (또는 마이크로 컨트롤러 보드가 전원을 구성할 수 없는 경우 호스트와 마이크로 컨트롤러 간에 5V 전원을 전달하지 않도록 USB 케이블을 수정할 수 있습니다.)
 
 ## Raspberry Pi가 인쇄 중에 계속 재부팅됩니다
 
-This is most likely do to voltage fluctuations. Follow the same
-troubleshooting steps for a
-["Lost communication with MCU"](#i-keep-getting-random-lost-communication-with-mcu-errors)
-error.
+이것은 대부분 전압 변동이 원인일 가능성이 있습니다. 문제를 해결하려면 ["MCU와의 통신 끊김"](#랜덤하게-MCU와의-통신-끊김-오류가-계속-발생합니다)를 따르십시오.
 
 ## "restart_method=command"를 설정하면 AVR 장치가 다시 시작할 때 멈춥니다
 
-Some old versions of the AVR bootloader have a known bug in watchdog
-event handling. This typically manifests when the printer.cfg file has
-restart_method set to "command". When the bug occurs, the AVR device
-will be unresponsive until power is removed and reapplied to the
-device (the power or status LEDs may also blink repeatedly until the
-power is removed).
+AVR 부트로더의 일부 이전 버전에는 워치독 이벤트 처리에 알려진 버그가 있습니다. 이것은 일반적으로 printer.cfg 파일에 restart_method가 "command"로 설정되어 있을 때 나타납니다. 버그가 발생하면 전원이 제거되고 장치에 다시 공급될 때까지 AVR 장치가 응답하지 않습니다 (전원이 제거될 때까지 전원 또는 상태 LED도 반복적으로 깜박일 수 있음).
 
-The workaround is to use a restart_method other than "command" or to
-flash an updated bootloader to the AVR device. Flashing a new
-bootloader is a one time step that typically requires an external
-programmer - see [Bootloaders](Bootloaders.md) for further details.
+해결 방법은 "command" 이외의 restart_method를 사용하거나 업데이트된 부트로더를 AVR 장치에 플래시하는 것입니다. 새 부트로더를 플래싱하는 것은 일반적으로 외부 프로그래머가 필요한 일회성 단계입니다. 자세한 내용은 [Bootloaders](Bootloaders.md)를 참조하십시오.
 
 ## Raspberry Pi가 비정상 종료하면 히터가 켜져 있습니까?
 
@@ -345,14 +310,9 @@ G-Code).
 
 ## 최신 소프트웨어로 업그레이드하려면 어떻게 합니까?
 
-The first step to upgrading the software is to review the latest
-[config changes](Config_Changes.md) document. On occasion, changes are
-made to the software that require users to update their settings as
-part of a software upgrade. It is a good idea to review this document
-prior to upgrading.
+소프트웨어 업그레이드의 첫 번째 단계는 최신 [config changes](Config_Changes.md) 를 검토하는 것입니다. 업그레이드하기 전에 이 문서를 검토하는 것이 좋습니다.
 
-When ready to upgrade, the general method is to ssh into the Raspberry
-Pi and run:
+업그레이드할 준비가 되면 일반적인 방법은 Raspberry Pi에 ssh 로 접속하고 다음을 실행하는 것입니다:
 
 ```
 cd ~/klipper
@@ -360,8 +320,7 @@ git pull
 ~/klipper/scripts/install-octopi.sh
 ```
 
-Then one can recompile and flash the micro-controller code. For
-example:
+그런 다음 마이크로 컨트롤러 코드를 다시 컴파일하고 펌웨어 업로드 할 수 있습니다. 예를 들어:
 
 ```
 make menuconfig
@@ -373,8 +332,7 @@ make flash FLASH_DEVICE=/dev/ttyACM0
 sudo service klipper start
 ```
 
-However, it's often the case that only the host software changes. In
-this case, one can update and restart just the host software with:
+그러나 호스트 소프트웨어만 변경되는 경우가 많습니다. 이 경우 다음을 사용하여 호스트 소프트웨어만 업데이트하고 다시 시작할 수 있습니다:
 
 ```
 cd ~/klipper
@@ -382,17 +340,11 @@ git pull
 sudo service klipper restart
 ```
 
-If after using this shortcut the software warns about needing to
-reflash the micro-controller or some other unusual error occurs, then
-follow the full upgrade steps outlined above.
+만약에 이렇게 했는데도 마이크로 컨트롤러를 다시 펌업 해야 한다고 경고하거나 기타 비정상적인 오류가 발생하면 위에 설명된 전체 업그레이드 단계를 따르십시오.
 
-If any errors persist then double check the
-[config changes](Config_Changes.md) document, as you may need to
-modify the printer configuration.
+오류가 지속되면 프린터 config 를 수정해야 할 수 있으므로 [config changes](Config_Changes.md)를 다시 확인하십시오.
 
-Note that the RESTART and FIRMWARE_RESTART g-code commands do not load
-new software - the above "sudo service klipper restart" and "make
-flash" commands are needed for a software change to take effect.
+RESTART 및 FIRMWARE_RESTART gcode 명령은 새 호스트 소프트웨어를 로드하지 않습니다. 호스트 소프트웨어 변경 사항을 적용하려면 위의 "sudo service klipper restart" 및 "make flash" 명령이 필요합니다
 
 ## Klipper를 어떻게 제거합니까?
 
