@@ -1,31 +1,28 @@
-# API server
+# API 서버
 
-This document describes Klipper's Application Programmer Interface
-(API). This interface enables external applications to query and
-control the Klipper host software.
+이 문서는 Klipper 의 API 에 대해서 기술합니다.
+해당 인터페이스는 외부 어플리케이션을 하여금 Klipper 프로그램에 대한 조회와 컨트롤을 가능하게 합니다.
 
-## Enabling the API socket
+## API 소켓 활성화
 
-In order to use the API server, the klippy.py host software must be
-started with the `-a` parameter. For example:
+API 서버를 사용하기 위해선, 먼저 klippy.py 프로그램을 `-a` 파라미터로 시작해야 합니다.
+예)
 ```
 ~/klippy-env/bin/python ~/klipper/klippy/klippy.py ~/printer.cfg -a /tmp/klippy_uds -l /tmp/klippy.log
 ```
 
-This causes the host software to create a Unix Domain Socket. A client
-can then open a connection on that socket and send commands to
-Klipper.
+이 옵션은 유닉스 도메인 소켓을 생성하도록 합니다. 클라이언트는 해당 소켓으로 연결하여 Klipper 에게 명령을 내릴 수 있습니다.
 
-## Request format
+## 요청 포맷
 
-Messages sent and received on the socket are JSON encoded strings
-terminated by an ASCII 0x03 character:
+소켓을 통해 주고 받는 메세지는 JSON 으로 인코딩되는 문자열입니다.
+또한 ASCII 0x03 문자로 종료 처리 됩니다.
 ```
 <json_object_1><0x03><json_object_2><0x03>...
 ```
 
-Klipper contains a `scripts/whconsole.py` tool that can perform the
-above message framing. For example:
+Klipper 에는 `scripts/whconsole.py` 스크립트가 포함되어 있습니다.
+해당 스크립트를 통해 요청 포맷에 맞는 메세지를 세팅할 수 있습니다.
 ```
 ~/klipper/scripts/whconsole.py /tmp/klippy_uds
 ```
@@ -36,7 +33,12 @@ be on a single line, and it will automatically append the 0x03
 terminator when transmitting a request. (The Klipper API server does
 not have a newline requirement.)
 
-## API Protocol
+이 스크립트로 stdin에서 일련의 JSON 명령어를 읽고 Klipper 로 보낼 수 있으며,
+결과를 확인할 수 있습니다.
+해당 스크립트는 각 JSON 명령어를 라인에 추가하고 요청을 전송시에 자동으로 0x03 문자를 추가 합니다.
+(Klipper API 서버는 줄 바꿈을 요구하지 않습니다\.)
+
+## API 프로토콜
 
 The command protocol used on the communication socket is inspired by
 [json-rpc](https://www.jsonrpc.org/).
