@@ -1,4 +1,4 @@
-# Frequently asked questions
+# 자주 묻는 질문들
 
 1. [어떻게 프로젝트에 기부할수 있나요?](#어떻게-프로젝트에-기부할수-있나요)
 2. [rotation_distance는 어떻게 계산합니까?](#rotation_distance는-어떻게-계산합니까)
@@ -36,21 +36,12 @@
 
 ## 내 시리얼 포트는 어디에 있습니까?
 
-The general way to find a USB serial port is to run `ls
-/dev/serial/by-id/*` from an ssh terminal on the host machine. It will
-likely produce output similar to the following:
-
-USB 직렬 포트를 찾는 일반적인 방법은 호스트 시스템의 ssh 터미널에서 다음의 명령을 실행하면 됩니다. `ls
- /dev/serial/by-id/*`. 그럼 다음과 같이 나옵니다:
+USB 직렬 포트를 찾는 일반적인 방법은 호스트 시스템의 ssh 터미널에서 다음의 명령을 실행하면 됩니다. `ls /dev/serial/by-id/*`. 그럼 다음과 같이 나옵니다:
 ```
 /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
 ```
 
-The name found in the above command is stable and it is possible to
-use it in the config file and while flashing the micro-controller
-code. For example, a flash command might look similar to:
-위 명령에서 찾은 이름을 사용해서 config 파일에 적을 수도 있고 마이크로 컨트롤러에 펌웨어 업로드 할때도 사용됩니다.
-예를 들어 flash 명령은 다음과 같이 사용할 수 있습니다.
+위 명령에서 찾은 이름을 사용해서 config 파일에 적을 수도 있고 마이크로 컨트롤러에 펌웨어 업로드 할때도 사용됩니다. 예를 들어 flash 명령은 다음과 같이 사용할 수 있습니다.
 ```
 sudo service klipper stop
 make flash FLASH_DEVICE=/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
@@ -96,46 +87,19 @@ Klipper 마이크로 컨트롤러 전송 속도는 마이크로 컨트롤러 부
 
 ## Raspberry Pi 3 이외의 다른 기기에서 Klipper를 실행할 수 있습니까?
 
-The recommended hardware is a Raspberry Pi 2, Raspberry Pi 3, or
-Raspberry Pi 4.
+권장 하드웨어는 Raspberry Pi 2, Raspberry Pi 3 또는 Raspberry Pi 4입니다.
 
-Klipper will run on a Raspberry Pi 1 and on the Raspberry Pi Zero, but
-these boards don't have enough processing power to run OctoPrint
-well. It is common for print stalls to occur on these slower machines
-when printing directly from OctoPrint. (The printer may move faster
-than OctoPrint can send movement commands.) If you wish to run on one
-one of these slower boards anyway, consider using the "virtual_sdcard"
-feature when printing (see
-[config reference](Config_Reference.md#virtual_sdcard) for details).
+Klipper는 Raspberry Pi 1 및 Raspberry Pi Zero에서 실행되지만 이러한 보드에는 OctoPrint를 제대로 실행하기에 충분한 처리 능력이 없습니다. OctoPrint에서 직접 인쇄할 때 이러한 느린 시스템에서 인쇄 중단이 발생하는 것은 일반적입니다. (프린터는 OctoPrint가 이동 명령을 보낼 수 있는 것보다 더 빠르게 움직일 수 있습니다.) 어쨌든 이러한 느린 보드 중 하나에서 실행하려면 인쇄할 때 "virtual_sdcard" 기능을 사용하는 것을 고려하십시오(자세한 내용은 [config reference](Config_Reference.md#virtual_sdcard) 참조).
 
-For running on the Beaglebone, see the
-[Beaglebone specific installation instructions](beaglebone.md).
+Beaglebone에서 실행하려면 [Beaglebone specific installation instructions](beaglebone.md) 을 참조하십시오.
 
-Klipper has been run on other machines. The Klipper host software only
-requires Python running on a Linux (or similar) computer. However, if
-you wish to run it on a different machine you will need Linux admin
-knowledge to install the system prerequisites for that particular
-machine. See the [install-octopi.sh](../scripts/install-octopi.sh)
-script for further information on the necessary Linux admin steps.
+Klipper는 다양한 컴퓨터에서 실행될 수 있습니다. Klipper 호스트 소프트웨어에는 Linux(또는 이와 유사한) 컴퓨터에서 실행되는 Python만 있으면 됩니다. 그러나 다른 시스템에서 실행하려면 기본적으로 필요한 소프트웨어를 설치하기 위해 Linux 관리자 지식이 필요합니다. 필요한 Linux 관리자에 대한 추가 정보는 [install-octopi.sh](../scripts/install-octopi.sh) 를 참조하십시오.
 
-If you are looking to run the Klipper host software on a low-end chip,
-then be aware that, at a minimum, a machine with "double precision
-floating point" hardware is required.
+저가형 칩에서 Klipper 호스트 소프트웨어를 실행하려는 경우 최소한 "double precision floating point" 하드웨어가 있는 시스템이 필요하다는 점에 유의하십시오.
 
-If you are looking to run the Klipper host software on a shared
-general-purpose desktop or server class machine, then note that
-Klipper has some real-time scheduling requirements. If, during a
-print, the host computer also performs an intensive general-purpose
-computing task (such as defragmenting a hard drive, 3d rendering,
-heavy swapping, etc.), then it may cause Klipper to report print
-errors.
+만약 일반 컴퓨터 또는 서버 시스템에서 Klipper 호스트 소프트웨어를 실행하려는 경우 Klipper에는 몇 가지 'real-time scheduling'에 대한 요구 사항이 있습니다. 인쇄 중에 호스트 컴퓨터가 계산에 부하가 걸리는 컴퓨팅 작업(예: 하드 드라이브 조각 모음, 3d 렌더링, 대량 스와핑 등)을 수행하는 경우 Klipper가 출력 중 오류를 낼 수 있습니다.
 
-Note: If you are not using an OctoPi image, be aware that several
-Linux distributions enable a "ModemManager" (or similar) package that
-can disrupt serial communication. (Which can cause Klipper to report
-seemingly random "Lost communication with MCU" errors.) If you install
-Klipper on one of these distributions you may need to disable that
-package.
+참고: OctoPi 이미지를 사용하지 않는 경우 여러 Linux 배포판에서 직렬 통신을 방해할 수 있는 "ModemManager"(또는 유사한) 패키지를 활성화한다는 점에 유의하십시오. (이로 인해 Klipper가 무작위로 보이는 "MCU와의 통신 끊김" 오류를 보고할 수 있습니다.) 이러한 배포판 중 하나에 Klipper를 설치하는 경우 해당 패키지를 비활성화해야 할 수 있습니다.
 
 ## 동일한 호스트 시스템에서 여러 Klipper 인스턴스를 실행할 수 있습니까?
 
@@ -478,12 +442,9 @@ flash" commands are needed for a software change to take effect.
 
 ## Klipper를 어떻게 제거합니까?
 
-On the firmware end, nothing special needs to happen. Just follow the
-flashing directions for the new firmware.
+펌웨어 쪽에서는 특별히 해 줄 일이 없습니다. 그냥 새로 사용할 펌웨어 업로드 가이드를 따라서 업로드 하세요.
 
-On the raspberry pi end, an uninstall script is available in
-[scripts/klipper-uninstall.sh](../scripts/klipper-uninstall.sh). For
-example:
+라즈베리 파이 쪽에서 제거 스크립트는 [scripts/klipper-uninstall.sh](../scripts/klipper-uninstall.sh) 를 사용할 수 있습니다. 예를 들어:
 ```
 sudo ~/klipper/scripts/klipper-uninstall.sh
 rm -rf ~/klippy-env ~/klipper
