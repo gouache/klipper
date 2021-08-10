@@ -39,6 +39,9 @@
 The general way to find a USB serial port is to run `ls
 /dev/serial/by-id/*` from an ssh terminal on the host machine. It will
 likely produce output similar to the following:
+
+USB 직렬 포트를 찾는 일반적인 방법은 호스트 시스템의 ssh 터미널에서 다음의 명령을 실행하면 됩니다. `ls
+ /dev/serial/by-id/*`. 그럼 다음과 같이 나옵니다:
 ```
 /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
 ```
@@ -46,80 +49,50 @@ likely produce output similar to the following:
 The name found in the above command is stable and it is possible to
 use it in the config file and while flashing the micro-controller
 code. For example, a flash command might look similar to:
+위 명령에서 찾은 이름을 사용해서 config 파일에 적을 수도 있고 마이크로 컨트롤러에 펌웨어 업로드 할때도 사용됩니다.
+예를 들어 flash 명령은 다음과 같이 사용할 수 있습니다.
 ```
 sudo service klipper stop
 make flash FLASH_DEVICE=/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
 sudo service klipper start
 ```
-and the updated config might look like:
+그리고 config 파일을 보면 아래와 같이 mcu 항목이 작성되어 있습니다:
 ```
 [mcu]
 serial: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
 ```
 
-Be sure to copy-and-paste the name from the "ls" command that you ran
-above as the name will be different for each printer.
+그곳에 ls 명령어로 찾은 시리얼 내용을 복사하여 넣으십시오. 내용은 프린터에 따라 다를 수 있습니다.
 
-If you are using multiple micro-controllers and they do not have
-unique ids (common on boards with a CH340 USB chip) then follow the
-directions above using the command `ls /dev/serial/by-path/*` instead.
+여러 개의 마이크로컨트롤러를 사용하고 있는데 마이크로컨트롤러의 고유 ID(`ls '/dev/serial/by-id/`)가 없는 경우에는 대신 `ls /dev/serial/by-path/*` 명령을 사용하여 위의 지침을 따르십시오.
 
 ## 마이크로 컨트롤러가 다시 시작되면 장치가 /dev/ttyUSB1 로 변경됩니다
 
-Follow the directions in the
-"[Where's my serial port?](#wheres-my-serial-port)" section to prevent
-this from occurring.
+링크의 지침을 따르면
+"[내 시리얼 포트는 어디에 있습니까?](#내-시리얼-포트는-어디에-있습니까)" 문제 해결이 가능합니다.
 
 ## "make flash" 가 동작하지 않습니다
 
-The code attempts to flash the device using the most common method for
-each platform. Unfortunately, there is a lot of variance in flashing
-methods, so the "make flash" command may not work on all boards.
+"make flash" 명령어는 가장 일반적인 방법을 사용하여 펌웨어 업로드를 시도합니다. 불행히도 각 플랫폼마다 펌웨어 업로드하는 방법에는 많은 차이가 있습니다. 따라서 "make flash" 명령이 모든 보드에서 작동하지 않을 수 있습니다.
 
-If you're having an intermittent failure or you do have a standard
-setup, then double check that Klipper isn't running when flashing
-(sudo service klipper stop), make sure OctoPrint isn't trying to
-connect directly to the device (open the Connection tab in the web
-page and click Disconnect if the Serial Port is set to the device),
-and make sure FLASH_DEVICE is set correctly for your board (see the
-[question above](#wheres-my-serial-port)).
+만약 간헐적인 오류가 발생하거나 표준 설정을 잘 따르고 있다면, 펌웨어 업로드는 하는 동안 Klipper가 실행되고 있지 않은지 다시 확인하십시오 (sudo service klipper stop), 또한 OctoPrint가 실행되고 있는지도 확인하십시오 (Octoprint 프린터 연결 해제를 클릭합니다) 그리고 나서 FLASH_DEVICE가 보드에 대해 올바르게 설정되어 있는지 확인하십시오 (참조 [위 질문](#내-시리얼-포트는-어디에-있습니까)).
 
-However, if "make flash" just doesn't work for your board, then you
-will need to manually flash. See if there is a config file in the
-[config directory](../config) with specific instructions for flashing
-the device. Also, check the board manufacturer's documentation to see
-if it describes how to flash the device. Finally, it may be possible
-to manually flash the device using tools such as "avrdude" or
-"bossac" - see the [bootloader document](Bootloaders.md) for
-additional information.
+그러나 "make flash"가 보드에서 작동하지 않으면 수동으로 플래시해야 합니다. 펌웨어 업로드에 대한 특정 명령어가 포함된 구성 파일이 config 디렉토리에 있는지 확인하십시오. 또한 보드 제조업체의 설명서에 장치에 펌웨어 업로드 하는 방법이 설명되어 있는지 확인하십시오. 마지막으로 "avrdude" 또는 "bossac"과 같은 도구를 사용하여 장치에 수동으로 펌웨어 업로드 할 수 있습니다. 추가 정보는 [bootloader document](Bootloaders.md)를 참조하십시오.
 
 ## 시리얼 포트 전송 속도는 어떻게 변경합니까?
 
-The recommended baud rate for Klipper is 250000. This baud rate works
-well on all micro-controller boards that Klipper supports. If you've
-found an online guide recommending a different baud rate, then ignore
-that part of the guide and continue with the default value of 250000.
+Klipper의 권장 전송 속도는 250000입니다. 이 전송 속도는 Klipper가 지원하는 모든 마이크로 컨트롤러 보드에서 잘 작동합니다. 다른 전송 속도를 권장하는 온라인 가이드를 찾은 경우 가이드의 해당 부분을 무시하고 기본값 250000을 계속 사용하십시오.
 
-If you want to change the baud rate anyway, then the new rate will
-need to be configured in the micro-controller (during **make
-menuconfig**) and that updated code will need to be compiled and
-flashed to the micro-controller. The Klipper printer.cfg file will
-also need to be updated to match that baud rate (see the
-[config reference](Config_Reference.md#mcu) for details).  For
-example:
+어쨌든 전송 속도를 변경하려면 마이크로 컨트롤러에서 새 속도를 구성해야 하고(**make menuconfig**를 통해서) 업데이트된 코드를 컴파일하고 마이크로 컨트롤러에 펌웨어 업로드 해야 합니다. Klipper printer.cfg 파일도 해당 전송 속도와 일치하도록 업데이트해야 합니다(자세한 내용은 [config reference](Config_Reference.md#mcu) 참조). 예를 들어:
 ```
 [mcu]
 baud: 250000
 ```
 
-The baud rate shown on the OctoPrint web page has no impact on the
-internal Klipper micro-controller baud rate. Always set the OctoPrint
-baud rate to 250000 when using Klipper.
+OctoPrint 웹 페이지에 표시된 전송 속도는 내부 Klipper 마이크로 컨트롤러 전송 속도에 영향을 미치지 않습니다. Klipper를 사용할 때는 항상 OctoPrint 전송 속도를 250000으로 설정하십시오.
 
-The Klipper micro-controller baud rate is not related to the baud rate
-of the micro-controller's bootloader. See the
-[bootloader document](Bootloaders.md) for additional information on
-bootloaders.
+Klipper 마이크로 컨트롤러 전송 속도는 마이크로 컨트롤러 부트로더의 전송 속도와 관련이 없습니다. 부트로더에 대한 추가 정보는 [bootloader document](Bootloaders.md)를 참조하십시오.
+
 
 ## Raspberry Pi 3 이외의 다른 기기에서 Klipper를 실행할 수 있습니까?
 
