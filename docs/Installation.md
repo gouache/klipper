@@ -74,66 +74,34 @@ OctoPrint 웹 서버는 Klipper 호스트 소프트웨어와 통신하도록 구
 
 ## Klipper 설정
 
-The Klipper configuration is stored in a text file on the Raspberry
-Pi. Take a look at the example config files in the
-[config directory](../config/). The
-[config reference](Config_Reference.md) contains documentation on
-config parameters.
+Klipper 구성은 Raspberry Pi의 텍스트 파일에 저장됩니다. [config directory](../config/) 있는 예제 구성 파일을 살펴보십시오. [config reference](Config_Reference.md)에는 config 매개변수에 대한 문서가 포함되어 있습니다.
 
-Arguably the easiest way to update the Klipper configuration file is
-to use a desktop editor that supports editing files over the "scp"
-and/or "sftp" protocols. There are freely available tools that support
-this (eg, Notepad++, WinSCP, and Cyberduck). Use one of the example
-config files as a starting point and save it as a file named
-"printer.cfg" in the home directory of the pi user (ie,
-/home/pi/printer.cfg).
+논란의 여지 없이 Klipper 구성 파일을 업데이트하는 가장 쉬운 방법은 "scp" 및/또는 "sftp" 프로토콜을 통한 파일 편집을 지원하는 데스크탑 편집기를 사용하는 것입니다. 이를 지원하는 무료 도구가 있습니다(예: Notepad++, WinSCP 및 Cyberduck). 예제 구성 파일 중 하나를 시작점으로 사용하고 pi 사용자의 홈 디렉토리(즉, /home/pi/printer.cfg)에 "printer.cfg"라는 파일로 저장합니다.
 
-Alternatively, one can also copy and edit the file directly on the
-Raspberry Pi via ssh - for example:
+또는 ssh를 통해 Raspberry Pi에서 직접 파일을 복사하고 편집할 수도 있습니다. 예를 들면 다음과 같습니다:
 
 ```
 cp ~/klipper/config/example-cartesian.cfg ~/printer.cfg
 nano ~/printer.cfg
 ```
 
-Make sure to review and update each setting that is appropriate for
-the hardware.
+printer.cfg 파일 내용을 하드웨어에 적합한 각 설정을 검토하고 업데이트하십시오.
 
-It's common for each printer to have its own unique name for the
-micro-controller. The name may change after flashing Klipper, so rerun
-the `ls /dev/serial/by-id/*` command and then update the config file
-with the unique name. For example, update the `[mcu]` section to look
-something similar to:
+각 프린터마다 마이크로 컨트롤러에 대해 고유한 이름이 있는 것이 일반적입니다. Klipper 플래싱 후에 이름이 변경될 수 있으므로 ls /dev/serial/by-id/* 명령을 다시 실행한 다음 구성 파일을 고유한 이름으로 업데이트하십시오. 예를 들어 [mcu] 섹션을 다음과 유사하게 업데이트합니다:
 
 ```
 [mcu]
 serial: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0
 ```
 
-After creating and editing the file it will be necessary to issue a
-"restart" command in the OctoPrint web terminal to load the config. A
-"status" command will report the printer is ready if the Klipper
-config file is successfully read and the micro-controller is
-successfully found and configured. It is not unusual to have
-configuration errors during the initial setup - update the printer
-config file and issue "restart" until "status" reports the printer is
-ready.
+파일을 만들고 편집한 후 config 를 로드하려면 OctoPrint 웹 terminal 탭에서 "restart" 명령을 실행해야 합니다. "status" 명령은 Klipper 구성 파일을 성공적으로 읽고 마이크로 컨트롤러를 성공적으로 찾아서 구성한 경우 프린터가 준비되었음을 보고합니다. 초기 설정 중에 구성 오류가 발생하는 것은 드문 일이 아닙니다. 프린터 구성 파일을 업데이트하고 "status"에서 프린터가 준비되었다고 보고할 때까지 "restart"을 실행하십시오.
 
-Klipper reports error messages via the OctoPrint terminal tab. The
-"status" command can be used to re-report error messages. The default
-Klipper startup script also places a log in **/tmp/klippy.log** which
-provides more detailed information.
+Klipper는 OctoPrint terminal 탭을 통해 오류 메시지를 보고합니다. "status" 명령을 사용하여 오류 메시지를 다시 보고할 수 있습니다. Klipper 시작 스크립트는 **/tmp/klippy.log**를 통해 자세한 정보를 제공합니다.
 
-In addition to common g-code commands, Klipper supports a few extended
-commands - "status" and "restart" are examples of these commands. Use
-the "help" command to get a list of other extended commands.
+추가로 일반적인 gcode 명령 외에도 Klipper는 몇 가지 확장 명령을 지원합니다. "status" 및 "restart"는 이러한 명령의 예입니다. "help" 명령을 사용하여 다른 확장 명령을 확인하십시오.
 
-After Klipper reports that the printer is ready go on to the
-[config check document](Config_checks.md) to perform some basic checks
-on the pin definitions in the config file.
+Klipper가 프린터가 준비되었다고 보고한 후 [config check document](Config_checks.md)로 이동하여 config 파일의 핀 정의에 대한 몇 가지 기본 검사를 수행합니다.
 
-## Contacting the developers
+## 개발자에게 문의
 
-Be sure to see the [FAQ](FAQ.md) for answers to some common questions.
-See the [contact page](Contact.md) to report a bug or to contact the
-developers.
+몇 가지 일반적인 질문에 대한 답변은 [FAQ](FAQ.md)를 참조하십시오. 버그를 보고하거나 개발자에게 연락하려면 [contact page](Contact.md)를 참조하세요.
