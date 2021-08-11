@@ -1,6 +1,6 @@
 # 설치
 
-이 문서는 OctoPrint에 Raspberry Pi 에서 실행된다고 가정합니다. Raspberry Pi 2, 3 또는 4를 사용하는 것이 좋습니다([FAQ](FAQ.md#Raspberry-Pi-3-이외의-다른-기기에서-Klipper를-실행할-수-있습니까) 참조).
+이 문서는 OctoPrint가 Raspberry Pi 에서 실행된다고 가정합니다. Raspberry Pi 2, 3 또는 4를 사용하는 것이 좋습니다([FAQ](FAQ.md#Raspberry-Pi-3-이외의-다른-기기에서-Klipper를-실행할-수-있습니까) 참조).
 
 Klipper는 현재 다양한 Atmel ATmega 기반 마이크로 컨트롤러, [ARM based micro-controllers](Features.md#step-benchmarks) 및 [Beaglebone PRU](beaglebone.md) 기반 프린터를 지원합니다.
 
