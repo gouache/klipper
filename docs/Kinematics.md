@@ -1,23 +1,11 @@
-# Kinematics
+# 운동학
 
-This document provides an overview of how Klipper implements robot
-motion (its [kinematics](https://en.wikipedia.org/wiki/Kinematics)).
-The contents may be of interest to both developers interested in
-working on the Klipper software as well as users interested in better
-understanding the mechanics of their machines.
+이 문서는 Klipper가 로봇 모션을 구현하는 방법에 대한 개요를 제공합니다 ([운동학](https://en.wikipedia.org/wiki/Kinematics)).
+아래 내용은 Klipper 소프트웨어 작업에 관심이 있는 개발자와 기계의 역학을 더 잘 이해하는데 관심이 있는 사용자 모두에게 흥미로울 수 있습니다.
 
-## Acceleration
+## 가속도
 
-Klipper implements a constant acceleration scheme whenever the print
-head changes velocity - the velocity is gradually changed to the new
-speed instead of suddenly jerking to it. Klipper always enforces
-acceleration between the tool head and the print. The filament leaving
-the extruder can be quite fragile - rapid jerks and/or extruder flow
-changes lead to poor quality and poor bed adhesion. Even when not
-extruding, if the print head is at the same level as the print then
-rapid jerking of the head can cause disruption of recently deposited
-filament. Limiting speed changes of the print head (relative to the
-print) reduces risks of disrupting the print.
+Klipper는 프린트 헤드가 속도를 변경할 때마다 일정한 가속을 합니다. 속도는 갑자기 급상승하지 않고 점진적으로 새로운 속도로 변경됩니다. Klipper는 항상 툴헤드와 인쇄물 사이에 가속을 적용합니다. 익스트루더를 떠나는 필라멘트는 매우 약할 수 있기 때문에 급격한 저크 및/또는 압출기 흐름 변화는 출력물의 품질과 베드 접착력을 저하시킵니다. 압출되지 않은 상태에서도 프린트 헤드가 프린트와 같은 높이에 있으면 헤드의 급격한 요동으로 최근에 출력된 필라멘트가 손싱될 수 있습니다. 이 때 프린트 헤드의 속도 변경(프린트와 관련하여)을 제한하면 프린트가 중단될 위험이 줄어듭니다.
 
 It is also important to limit acceleration so that the stepper motors
 do not skip or put excessive stress on the machine. Klipper limits the
@@ -32,7 +20,7 @@ acceleration is:
 velocity(time) = start_velocity + accel*time
 ```
 
-## Trapezoid generator
+## 사다리꼴 생성기
 
 Klipper uses a traditional "trapezoid generator" to model the motion
 of each move - each move has a start speed, it accelerates to a
@@ -54,7 +42,7 @@ of zero duration (if the end speed is equal to the cruising speed).
 
 ![trapezoids](img/trapezoids.svg.png)
 
-## Look-ahead
+## 미리보기
 
 The "look-ahead" system is used to determine cornering speeds between
 moves.
@@ -96,7 +84,7 @@ Key formula for look-ahead:
 end_velocity^2 = start_velocity^2 + 2*accel*move_distance
 ```
 
-### Smoothed look-ahead
+### Smoothed 미리보기
 
 Klipper also implements a mechanism for smoothing out the motions of
 short "zigzag" moves. Consider the following moves:
@@ -164,7 +152,7 @@ cartesian_y_position = start_y + move_distance * total_y_movement / total_moveme
 cartesian_z_position = start_z + move_distance * total_z_movement / total_movement
 ```
 
-### Cartesian Robots
+### 카르테시안 로봇
 
 Generating steps for cartesian printers is the simplest case. The
 movement on each axis is directly related to the movement in cartesian
@@ -177,7 +165,7 @@ stepper_y_position = cartesian_y_position
 stepper_z_position = cartesian_z_position
 ```
 
-### CoreXY Robots
+### 코어XY 로봇
 
 Generating steps on a CoreXY machine is only a little more complex
 than basic cartesian robots. The key formulas are:
@@ -187,7 +175,7 @@ stepper_b_position = cartesian_x_position - cartesian_y_position
 stepper_z_position = cartesian_z_position
 ```
 
-### Delta Robots
+### 델타 로봇
 
 Step generation on a delta robot is based on Pythagoras's theorem:
 ```
@@ -197,7 +185,7 @@ stepper_position = (sqrt(arm_length^2
                     + cartesian_z_position)
 ```
 
-### Stepper motor acceleration limits
+### 스테퍼 모터 가속 제한
 
 With delta kinematics it is possible for a move that is accelerating
 in cartesian space to require an acceleration on a particular stepper
@@ -218,7 +206,7 @@ this limit, moves at the extreme edge of the build envelope (where a
 stepper arm may be nearly horizontal) will have a lower maximum
 acceleration and velocity.
 
-### Extruder kinematics
+### 익스트루더 운동학
 
 Klipper implements extruder motion in its own kinematic class. Since
 the timing and speed of each print head movement is fully known for
@@ -232,7 +220,7 @@ generation uses the same formulas that cartesian robots use:
 stepper_position = requested_e_position
 ```
 
-### Pressure advance
+### 압력 조절 (Pressure advance)
 
 Experimentation has shown that it's possible to improve the modeling
 of the extruder beyond the basic extruder formula. In the ideal case,
