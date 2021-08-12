@@ -1,6 +1,6 @@
 # Overview
 
-Welcome to the Klipper documentation. If new to Klipper, start with
+Klipper 에 오신것을 환영합니다. If new to Klipper, start with
 the [features](Features.md) and [installation](Installation.md)
 documents.
 
