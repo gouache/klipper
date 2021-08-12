@@ -5,113 +5,64 @@
 
 ## 가속도
 
-Klipper는 프린트 헤드가 속도를 변경할 때마다 일정한 가속을 합니다. 속도는 갑자기 급상승하지 않고 점진적으로 새로운 속도로 변경됩니다. Klipper는 항상 툴헤드와 인쇄물 사이에 가속을 적용합니다. 익스트루더를 떠나는 필라멘트는 매우 약할 수 있기 때문에 급격한 저크 및/또는 압출기 흐름 변화는 출력물의 품질과 베드 접착력을 저하시킵니다. 압출되지 않은 상태에서도 프린트 헤드가 프린트와 같은 높이에 있으면 헤드의 급격한 요동으로 최근에 출력된 필라멘트가 손싱될 수 있습니다. 이 때 프린트 헤드의 속도 변경(프린트와 관련하여)을 제한하면 프린트가 중단될 위험이 줄어듭니다.
+Klipper는 프린트 헤드가 속도를 변경할 때마다 일정한 가속을 합니다. 속도는 갑자기 급상승하지 않고 점진적으로 새로운 속도로 변경됩니다. Klipper는 항상 툴헤드와 인쇄물 사이에 가속을 적용합니다. 익스트루더를 떠나는 필라멘트는 매우 약할 수 있기 때문에 급격한 저크 및/또는 압출기 흐름 변화는 출력물의 품질과 베드 접착력을 저하시킵니다. 압출되지 않은 상태에서도 프린트 헤드가 프린트와 같은 높이에 있으면 헤드의 급격한 요동으로 최근에 출력된 필라멘트가 손싱될 수 있습니다. 이 때 프린트 헤드의 속도 변경을 제한하면 출력이 실패할 위험이 줄어듭니다.
 
-It is also important to limit acceleration so that the stepper motors
-do not skip or put excessive stress on the machine. Klipper limits the
-torque on each stepper by virtue of limiting the acceleration of the
-print head. Enforcing acceleration at the print head naturally also
-limits the torque of the steppers that move the print head (the
-inverse is not always true).
+스테퍼 모터가 탈조하거나 기계에 과도한 스트레스를 주지 않도록 가속을 제한하는 것도 중요합니다. Klipper는 프린트 헤드의 가속을 제한함으로써 각 스테퍼의 토크를 제한합니다.
+프린트 헤드에 가속을 적용하면 프린트 헤드를 움직이는 스테퍼의 토크도 자연스럽게 제한됩니다(반대의 경우가 항상 있는 것은 아닙니다).
 
-Klipper implements constant acceleration. The key formula for constant
-acceleration is:
+Klipper는 일정한 가속을 구현합니다. 등가속도의 핵심 공식은 다음과 같습니다:
 ```
 velocity(time) = start_velocity + accel*time
 ```
 
 ## 사다리꼴 생성기
 
-Klipper uses a traditional "trapezoid generator" to model the motion
-of each move - each move has a start speed, it accelerates to a
-cruising speed at constant acceleration, it cruises at a constant
-speed, and then decelerates to the end speed using constant
-acceleration.
+Klipper는 기존의 "사다리꼴 생성기"를 사용하여 각 동작의 동작을 모델링합니다. 각 동작에는 시작 속도가 있고, 일정한 가속에서 순항 속도로 가속하고, 일정한 속도로 순항한 다음, 일정한 가속을 사용하여 끝 속도로 감속합니다.
 
-![trapezoid](img/trapezoid.svg.png)
+![사다리꼴](img/trapezoid.svg.png)
 
-It's called a "trapezoid generator" because a velocity diagram of the
-move looks like a trapezoid.
+움직임의 속도 다이어그램이 사다리꼴처럼 보이기 때문에 이것을 "사다리꼴 생성기"라고 합니다.
 
-The cruising speed is always greater than or equal to both the start
-speed and the end speed. The acceleration phase may be of zero
-duration (if the start speed is equal to the cruising speed), the
-cruising phase may be of zero duration (if the move immediately starts
-decelerating after acceleration), and/or the deceleration phase may be
-of zero duration (if the end speed is equal to the cruising speed).
+순항 속도는 항상 시작 속도와 끝 속도보다 크거나 같습니다. 가속 단계는 지속 시간이 0일 수 있고(시작 속도가 순항 속도와 동일한 경우) 순항 단계는 지속 시간이 0일 수 있으며(가속 후 즉시 감속이 시작되는 경우), 감속 단계는 0일 수 있습니다. 지속 시간(종료 속도가 순항 속도와 동일한 경우).
 
-![trapezoids](img/trapezoids.svg.png)
+![사다리꼴](img/trapezoids.svg.png)
 
-## 미리보기
+## 예측 (look-ahead)
 
-The "look-ahead" system is used to determine cornering speeds between
-moves.
+"예측" 시스템은 움직임 사이의 코너링 속도를 결정하는 데 사용됩니다.
 
-Consider the following two moves contained on an XY plane:
+XY 평면에서 일어날 수 있는 다음 두 가지 이동을 생각해 보십시오:
 
-![corner](img/corner.svg.png)
+![코너](img/corner.svg.png)
 
-In the above situation it is possible to fully decelerate after the
-first move and then fully accelerate at the start of the next move,
-but that is not ideal as all that acceleration and deceleration would
-greatly increase the print time and the frequent changes in extruder
-flow would result in poor print quality.
+위의 상황에서 첫 번째 이동 후에 완전히 감속한 후 다음 이동을 시작할 때 완전히 가속하는 것도 가능하지만, 이런 모든 가속과 감속이 출력 시간을 크게 증가시키고 압출기 흐름의 빈번한 변화를 증가시키므로 이상적이지 않습니다. 또한 이로인해 인쇄 품질도 떨어질 수 있습니다.
 
-To solve this, the "look-ahead" mechanism queues multiple incoming
-moves and analyzes the angles between moves to determine a reasonable
-speed that can be obtained during the "junction" between two moves. If
-the next move is nearly in the same direction then the head need only
-slow down a little (if at all).
+이를 해결하기 위해 "예측" 메커니즘은 들어오는 여러 움직임을 대기열에 넣고 움직임 사이의 각도를 분석하여 두 움직임 사이의 "연결" 동안 얻을 수 있는 합리적인 속도를 결정합니다. 다음 움직임이 거의 같은 방향에 있으면 해드만 약간 느려지면 됩니다.
 
-![lookahead](img/lookahead.svg.png)
+![예측](img/lookahead.svg.png)
 
-However, if the next move forms an acute angle (the head is going to
-travel in nearly a reverse direction on the next move) then only a
-small junction speed is permitted.
+그러나 다음 이동이 예각을 형성하는 경우(헤드가 다음 이동에서 거의 반대 방향으로 이동하게 됨) 작은 연결 속도만 허용됩니다.
 
-![lookahead](img/lookahead-slow.svg.png)
+![예측](img/lookahead-slow.svg.png)
 
-The junction speeds are determined using "approximated centripetal
-acceleration". Best
-[described by the author](https://onehossshay.wordpress.com/2011/09/24/improving_grbl_cornering_algorithm/).
-However, in Klipper, junction speeds are configured by specifying the
-desired speed that a 90° corner should have (the "square corner
-velocity"), and the junction speeds for other angles are derived from
-that.
+연결 속도는 "approximated centripetal acceleration"를 사용하여 결정됩니다. [저자 설명](https://onehossshay.wordpress.com/2011/09/24/improving_grbl_cornering_algorithm/)을 참고. 그러나 Klipper에서 연결 속도는 90° 모서리가 가져야 하는 원하는 속도("정사각형 모서리 속도")를 지정하여 구성되며 다른 각도에 대한 접합 속도는 여기서 파생됩니다.
 
-Key formula for look-ahead:
+예측을 위한 핵심 공식:
 ```
 end_velocity^2 = start_velocity^2 + 2*accel*move_distance
 ```
 
-### Smoothed 미리보기
+### 부드러운 예측 (Smoothed Look-ahed)
 
-Klipper also implements a mechanism for smoothing out the motions of
-short "zigzag" moves. Consider the following moves:
+Klipper는 또한 짧은 "지그재그" 동작을 부드럽게 하는 메커니즘을 구현합니다. 다음 동작을 살펴보세요.
 
 ![zigzag](img/zigzag.svg.png)
 
-In the above, the frequent changes from acceleration to deceleration
-can cause the machine to vibrate which causes stress on the machine
-and increases the noise. To reduce this, Klipper tracks both regular
-move acceleration as well as a virtual "acceleration to deceleration"
-rate. Using this system, the top speed of these short "zigzag" moves
-are limited to smooth out the printer motion:
+위의 경우 가속에서 감속으로의 빈번한 변화는 기계를 진동시켜 기계에 스트레스를 일으키고 소음을 증가시킬 수 있습니다.이를 줄이기 위해 Klipper는 일반적인 이동 가속과 가상 "가속에서 감속" 비율을 모두 추적합니다. 이 시스템을 사용하면 이러한 짧은 "지그재그" 이동의 최고 속도는 프린터 동작을 부드럽게 하기 위해 제한됩니다:
 
 ![smoothed](img/smoothed.svg.png)
 
-Specifically, the code calculates what the velocity of each move would
-be if it were limited to this virtual "acceleration to deceleration"
-rate (half the normal acceleration rate by default). In the above
-picture the dashed gray lines represent this virtual acceleration rate
-for the first move. If a move can not reach its full cruising speed
-using this virtual acceleration rate then its top speed is reduced to
-the maximum speed it could obtain at this virtual acceleration
-rate. For most moves the limit will be at or above the move's existing
-limits and no change in behavior is induced. For short zigzag moves,
-however, this limit reduces the top speed. Note that it does not
-change the actual acceleration within the move - the move continues to
-use the normal acceleration scheme up to its adjusted top-speed.
+특히 코드는 이 가상 "가감속 가속" 비율 (기본적으로 정상 가속 비율의 절반)로 제한되는 경우 각 이동의 속도를 계산합니다. 위의 그림에서 회색 점선은 첫 번째 이동에 대한 가상 가속도를 나타냅니다. 이동이 이 가상 가속도를 사용하여 최대 순항 속도에 도달할 수 없는 경우 최고 속도는 이 가상 가속도에서 얻을 수 있는 최대 속도로 감소됩니다. 대부분의 동작에 대해 제한은 이동의 기존 제한 이상이며 동작의 변화가 생기지 않습니다. 그러나 짧은 지그재그 이동의 경우 이 제한으로 인해 최고 속도가 감소합니다. 이동 내 실제 가속은 변경되지 않습니다. 이동은 조정된 최고 속도까지 일반 가속 계획을 계속 사용합니다.
 
 ## Generating steps
 
