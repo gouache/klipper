@@ -1,39 +1,34 @@
 # G-Codes
 
-This document describes the commands that Klipper supports. These are
-commands that one may enter into the OctoPrint terminal tab.
+이 문서는 Klipper가 지원하는 명령에 대해 설명합니다. OctoPrint Terminal 탭에 입력할 수 있는 명령입니다.
 
-## G-Code commands
+## G-Code 명령어
 
-Klipper supports the following standard G-Code commands:
-- Move (G0 or G1): `G1 [X<pos>] [Y<pos>] [Z<pos>] [E<pos>] [F<speed>]`
-- Dwell: `G4 P<milliseconds>`
-- Move to origin: `G28 [X] [Y] [Z]`
-- Turn off motors: `M18` or `M84`
-- Wait for current moves to finish: `M400`
-- Use absolute/relative distances for extrusion: `M82`, `M83`
-- Use absolute/relative coordinates: `G90`, `G91`
-- Set position: `G92 [X<pos>] [Y<pos>] [Z<pos>] [E<pos>]`
-- Set speed factor override percentage: `M220 S<percent>`
-- Set extrude factor override percentage: `M221 S<percent>`
-- Set acceleration: `M204 S<value>` OR `M204 P<value> T<value>`
-  - Note: If S is not specified and both P and T are specified, then
-    the acceleration is set to the minimum of P and T. If only one of
-    P or T is specified, the command has no effect.
-- Get extruder temperature: `M105`
-- Set extruder temperature: `M104 [T<index>] [S<temperature>]`
-- Set extruder temperature and wait: `M109 [T<index>] S<temperature>`
-  - Note: M109 always waits for temperature to settle at requested
-    value
-- Set bed temperature: `M140 [S<temperature>]`
-- Set bed temperature and wait: `M190 S<temperature>`
-  - Note: M190 always waits for temperature to settle at requested
-    value
-- Set fan speed: `M106 S<value>`
-- Turn fan off: `M107`
-- Emergency stop: `M112`
-- Get current position: `M114`
-- Get firmware version: `M115`
+Klipper는 다음과 같은 표준 G-Code 명령을 지원합니다:
+- 이동 (G0 또는 G1): `G1 [X<위치>] [Y<위치>] [Z<위치>] [E<위치>] [F<속도>]`
+- 지연(멈춤): `G4 P<밀리세컨드>`
+- 원점으로 복귀: `G28 [X] [Y] [Z]`
+- 모터 끄기: `M18` 또는 `M84`
+- 현재 동작이 완료될 때까지 대기: `M400`
+- 익스트루더 사출에 절대/상대 거리 사용: `M82`, `M83`
+- 절대/상대 좌표 사용: `G90`, `G91`
+- 위치 설정: `G92 [X<위치>] [Y<위치>] [Z<위치>] [E<위치>]`
+- Set speed factor override percentage: `M220 S<백분율>`
+- Set extrude factor override percentage: `M221 S<백분율>`
+- 가속도 설정: `M204 S<값>` 또는 `M204 P<값> T<값>`
+ - 참고: S를 지정하지 않고 P와 T를 모두 지정하면 가속도는 P와 T의 최소값으로 설정됩니다. P 또는 T 중 하나만 지정하면 명령이 적용되지 않습니다.
+- 익스트루더(베드) 온도 가져오기: `M105`
+- 익스트루더 온도 설정: `M104 [T<인덱스>] [S<온도>]`
+- 익스트루더 온도 설정될때 까지 기다리기: `M109 [T<인덱스>] S<온도>`
+  - Note: 참고: M109는 항상 온도가 요청된 값으로 안정될 때까지 기다립니다.
+- 베드 온도 설정: `M140 [S<온도>]`
+- 베드 온도 설정될때 까지 기다리기: `M190 S<온도>`
+  - 참고: M190는 항상 온도가 요청된 값으로 안정될 때까지 기다립니다.
+- 팬 속도 설정: `M106 S<값>`
+- 팬 끄기: `M107`
+- 비상 정지: `M112`
+- 현재 위치 가져오기: `M114`
+- 펌웨어 버전 가져오기: `M115`
 
 For further details on the above commands see the
 [RepRap G-Code documentation](http://reprap.org/wiki/G-code).
