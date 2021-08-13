@@ -1,26 +1,24 @@
-# Measuring Resonances
+# 공진 측정
 
-Klipper has built-in support for ADXL345 accelerometer, which can be used to
-measure resonance frequencies of the printer for different axes, and auto-tune
-[input shapers](Resonance_Compensation.md) to compensate for resonances.
-Note that using ADXL345 requires some soldering and crimping. ADXL345 can be
-connected to a Raspberry Pi directly, or to an SPI interface of an MCU
-board (it needs to be reasonably fast).
+Klipper는 다양한 축에 대한 프린터의 공진 주파수를 측정하는 데 사용할 수 있는 ADXL345 
+가속도계를 기본적으로 지원하고 공진을 보상하기 위해 
+[input shapers](Resonance_Compensation.md) 를 자동 조정합니다.
+ADXL345 를 사용하려면 약간의 납땜 및 압착이 필요합니다. ADXL345는 Raspberry Pi에 
+직접 연결하거나 MCU 보드의 SPI 인터페이스에 연결할 수 있습니다(빠른 속도가 필요하기 때문에).
 
-When sourcing ADLX345, be aware that there is a variety of different PCB
-board designs and different clones of them. Make sure that the board supports
-SPI mode (small number of boards appear to be hard-configured for I2C by
-pulling SDO to GND), and, if it is going to be connected to a 5V printer MCU,
-that it has a voltage regulator and a level shifter.
+ADLX345를 구입할 때 다양한 PCB 보드 디자인과 다양한 복제품이 있다는 점에 유의하십시오. 
+보드가 SPI 모드를 지원하는지 확인하십시오 (어떤 보드는 SDO 를 GND 로 당겨서 I2C 에
+대해 하드 구성되어 있는 것으로 나타남). 그리고 5V 프린터 MCU 에 연결하려는 경우 전압 
+레귤레이터 및 레벨 시프터가 필요할 수 있습니다.
 
+## 설치 방법
 
-## Installation instructions
+### 배선
 
-### Wiring
+SPI 를 통해 ADXL345 를 Raspberry Pi에 연결해야 합니다. ADXL345 문서에서 제안하는 
+I2C 연결은 처리량이 너무 낮아 **작동하지 않습니다**.
 
-You need to connect ADXL345 to your Raspberry Pi via SPI. Note that the I2C
-connection, which is suggested by ADXL345 documentation, has too low throughput
-and **will not work**. The recommended connection scheme:
+권장 연결 방식:
 
 | ADXL345 pin | RPi pin | RPi pin name |
 |:--:|:--:|:--:|
@@ -31,35 +29,33 @@ and **will not work**. The recommended connection scheme:
 | SDA | 19 | GPIO10 (SPI0_MOSI) |
 | SCL | 23 | GPIO11 (SPI0_SCLK) |
 
-Fritzing wiring diagrams for some of the ADXL345 boards:
+ADXL345 보드에 대한 Fritzing 배선 다이어그램:
 
 ![ADXL345-Rpi](img/adxl345-fritzing.png)
 
 
-Double-check your wiring before powering up the Raspberry Pi to prevent
-damaging it or the accelerometer.
+Raspberry Pi 또는 가속도계의 손상을 방지하기 위해 Raspberry Pi의 전원을 켜기 
+전에 배선을 다시 확인하십시오.
 
-### Mounting the accelerometer
+### 가속도계 장착
 
-The accelerometer must be attached to the toolhead. One needs to design a proper
-mount that fits their own 3D printer. It is better to align the axes of the
-accelerometer with the printer's axes (but if it makes it more convenient,
-axes can be swapped - i.e. no need to align X axis with X and so forth - it
-should be fine even if Z axis of accelerometer is X axis of the printer, etc.).
+가속도계는 툴헤드에 부착되어야 합니다. 자신의 3D 프린터에 맞는 적절한 마운트를 설계해야 합니다. 
+가속도계의 축을 프린터의 축과 정렬하는 것이 좋습니다 (그러나 더 편리하게 만들면 축을 바꿀 수 
+있습니다. 즉, X축을 X와 정렬할 필요가 없습니다. Z축이 다음과 같아도 괜찮습니다. 가속도계는 
+프린터의 X축 등).
 
-An example of mounting ADXL345 on the SmartEffector:
+SmartEffector 에 ADXL345 를 장착하는 예:
 
 ![ADXL345 on SmartEffector](img/adxl345-mount.jpg)
 
-Note that on a bed slinger printer one must design 2 mounts: one for the
-toolhead and one for the bed, and run the measurements twice. See the
-corresponding [section](#bed-slinger-printers) for more details.
+베드 슬링어 프린터에서 하나는 2개의 마운트를 설계해야 합니다. 하나는 헤드용, 다른 하나는 
+베드용이고 측정을 두 번 실행합니다. 
 
-**Attention:** make sure the accelerometer and any screws that hold it in
-place do not touch any metal parts of the printer. Basically, the mount must
-be designed such as to ensure the electrical isolation of the accelerometer
-from the printer frame. Failing to ensure that can create a ground loop in
-the system that may damage the electronics.
+자세한 내용은 해당 [section](#bed-slinger-printers) 을 참조하세요.
+
+**주의:** 가속도계와 이를 고정하는 나사가 프린터의 금속 부분에 닿지 않도록 하십시오.
+기본적으로 마운트는 프린터 프레임에서 가속도계의 전기적 절연을 보장하도록 설계되어야 합니다.
+스템에 접지가 되지 않으면 전자 장치를 손상시킬 수 있습니다.
 
 ### Software installation
 
