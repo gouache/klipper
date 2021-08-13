@@ -66,50 +66,29 @@ Klipper는 또한 짧은 "지그재그" 동작을 부드럽게 하는 메커니�
 
 ## Generating steps
 
-Once the look-ahead process completes, the print head movement for the
-given move is fully known (time, start position, end position,
-velocity at each point) and it is possible to generate the step times
-for the move. This process is done within "kinematic classes" in the
-Klipper code. Outside of these kinematic classes, everything is
-tracked in millimeters, seconds, and in cartesian coordinate space.
-It's the task of the kinematic classes to convert from this generic
-coordinate system to the hardware specifics of the particular printer.
+예측 프로세스가 완료되면 주어진 이동에 대한 프린트 헤드 이동이 완전히 정해지고 (시간, 시작 위치, 종료 위치, 각 지점의 속도) 이동에 대한 step 시간을 생성할 수 있습니다. 이 프로세스는 Klipper 코드의 "운동학 클래스" 내에서 수행됩니다. 이러한 운동학 클래스 외부에서 모든 것은 밀리미터, 초 및 데카르트 좌표 공간에서 추적됩니다. 일반 좌표계에서 특정 프린터의 하드웨어 특성으로 변환하는 것은 운동학 클래스의 작업입니다. Klipper는 [iterative solver](https://en.wikipedia.org/wiki/Root-finding_algorithm)를 사용하여 각 스테퍼에 대한 step 시간을 생성합니다. 코드에는 매순간 헤드의 이상적인 직교 좌표를 계산하는 공식이 포함되어 있으며 이러한 직교 좌표를 기반으로 이상적인 스테퍼 위치를 계산하는 운동학 공식이 있습니다.이 공식을 사용하여 Klipper는 스테퍼가 각 step 위치에 있어야 하는 이상적인 시간을 결정할 수 있습니다. 그런 다음 주어진 step이 계산된 시간에 스케줄링됩니다.
 
-Klipper uses an
-[iterative solver](https://en.wikipedia.org/wiki/Root-finding_algorithm)
-to generate the step times for each stepper. The code contains the
-formulas to calculate the ideal cartesian coordinates of the head at
-each moment in time, and it has the kinematic formulas to calculate
-the ideal stepper positions based on those cartesian coordinates. With
-these formulas, Klipper can determine the ideal time that the stepper
-should be at each step position. The given steps are then scheduled at
-these calculated times.
-
-The key formula to determine how far a move should travel under
-constant acceleration is:
+일정한 가속도에서 이동해야 하는 거리를 결정하는 핵심 공식은 다음과 같습니다:
 ```
 move_distance = (start_velocity + .5 * accel * move_time) * move_time
 ```
-and the key formula for movement with constant velocity is:
+등속 운동의 핵심 공식은 다음과 같습니다:
 ```
 move_distance = cruise_velocity * move_time
 ```
 
-The key formulas for determining the cartesian coordinate of a move
-given a move distance is:
+이동 거리가 주어진 이동의 직교 좌표를 결정하는 주요 공식은 다음과 같습니다:
 ```
 cartesian_x_position = start_x + move_distance * total_x_movement / total_movement
 cartesian_y_position = start_y + move_distance * total_y_movement / total_movement
 cartesian_z_position = start_z + move_distance * total_z_movement / total_movement
 ```
 
-### 카르테시안 로봇
+### 직교 로봇
 
-Generating steps for cartesian printers is the simplest case. The
-movement on each axis is directly related to the movement in cartesian
-space.
+직교 프린터에 대한 step을 생성하는 것이 가장 간단한 경우입니다. 각 축의 움직임은 데카르트 좌표계의 움직임과 직접 관련이 있습니다.
 
-Key formulas:
+주요 공식:
 ```
 stepper_x_position = cartesian_x_position
 stepper_y_position = cartesian_y_position
@@ -118,8 +97,7 @@ stepper_z_position = cartesian_z_position
 
 ### 코어XY 로봇
 
-Generating steps on a CoreXY machine is only a little more complex
-than basic cartesian robots. The key formulas are:
+CoreXY 기계에서 step을 생성하는 것은 기본 직교 로봇보다 약간 더 복잡합니다. 주요 공식은 다음과 같습니다:
 ```
 stepper_a_position = cartesian_x_position + cartesian_y_position
 stepper_b_position = cartesian_x_position - cartesian_y_position
@@ -128,7 +106,7 @@ stepper_z_position = cartesian_z_position
 
 ### 델타 로봇
 
-Step generation on a delta robot is based on Pythagoras's theorem:
+델타 로봇의 step 생성은 피타고라스의 정리를 기반으로 합니다:
 ```
 stepper_position = (sqrt(arm_length^2
                          - (cartesian_x_position - tower_x_position)^2
@@ -138,92 +116,41 @@ stepper_position = (sqrt(arm_length^2
 
 ### 스테퍼 모터 가속 제한
 
-With delta kinematics it is possible for a move that is accelerating
-in cartesian space to require an acceleration on a particular stepper
-motor greater than the move's acceleration. This can occur when a
-stepper arm is more horizontal than vertical and the line of movement
-passes near that stepper's tower. Although these moves could require a
-stepper motor acceleration greater than the printer's maximum
-configured move acceleration, the effective mass moved by that stepper
-would be smaller. Thus the higher stepper acceleration does not result
-in significantly higher stepper torque and it is therefore considered
-harmless.
-
-However, to avoid extreme cases, Klipper enforces a maximum ceiling on
-stepper acceleration of three times the printer's configured maximum
-move acceleration. (Similarly, the maximum velocity of the stepper is
-limited to three times the maximum move velocity.) In order to enforce
-this limit, moves at the extreme edge of the build envelope (where a
-stepper arm may be nearly horizontal) will have a lower maximum
-acceleration and velocity.
+델타 운동학을 사용하면 직교 방식 운동학 가속도보다 더 큰 스테퍼 모터의 가속도를 요구할 수 있습니다. 이것은 스테퍼 암이 수직보다 수평이고 이동 선이 스테퍼 타워 근처를 지날 때 발생할 수 있습니다. 이러한 이동에는 프린터의 구성된 최대 이동 가속보다 더 큰 스테퍼 모터 가속이 필요할 수 있지만 해당 스테퍼에 의해 이동되는 유효 질량은 더 작습니다. 따라서 더 높은 스테퍼 가속은 훨씬 더 높은 스테퍼 토크를 초래하지 않으므로 무해한 것으로 간주됩니다. 그러나 극단적인 경우를 피하기 위해 Klipper는 프린터에 구성된 최대 이동 가속도의 3배로 스테퍼 가속에 대한 최대 상한을 적용합니다. (마찬가지로 스테퍼의 최대 속도는 최대 이동 속도의 3배로 제한됩니다.) 이 제한을 적용하기 위해 빌드 엔벨로프의 끝단 (스테퍼 암이 거의 수평일 수 있는 곳) 에서의 최대 가속도와 속도가 더 낮아집니다. 
 
 ### 익스트루더 운동학
 
-Klipper implements extruder motion in its own kinematic class. Since
-the timing and speed of each print head movement is fully known for
-each move, it's possible to calculate the step times for the extruder
-independently from the step time calculations of the print head
-movement.
+Klipper는 자체 운동학 클래스에서 익스트루더 동작을 구현합니다. 각 프린트 헤드 움직임의 타이밍과 속도는 이미 결정되었기 때문에 프린트 헤드 움직임의 step 시간 계산과 독립적으로 익스트루더의 step 시간을 계산할 수 있습니다.
 
-Basic extruder movement is simple to calculate. The step time
-generation uses the same formulas that cartesian robots use:
+기본적인 익스트루더 움직임은 계산하기 쉽습니다. step 시간 생성은 직교 로봇이 사용하는 것과 동일한 공식을 사용합니다:
 ```
 stepper_position = requested_e_position
 ```
 
 ### 압력 조절 (Pressure advance)
 
-Experimentation has shown that it's possible to improve the modeling
-of the extruder beyond the basic extruder formula. In the ideal case,
-as an extrusion move progresses, the same volume of filament should be
-deposited at each point along the move and there should be no volume
-extruded after the move. Unfortunately, it's common to find that the
-basic extrusion formulas cause too little filament to exit the
-extruder at the start of extrusion moves and for excess filament to
-extrude after extrusion ends. This is often referred to as "ooze".
+실험을 통해 기본 익스트루더 공식 이상으로 익스트루더의 모델링을 개선할 수 있음이 나타났습니다. 이상적인 경우 익스트루더 이동이 진행됨에 따라 각 지점에 동일한 부피의 필라멘트가 쌓여야 하며 이동 후 압출되는 부피가 없어야 합니다. 불행히도, 기본 익스트루더 공식으로 인해 이동이 시작될 때 익스트루더를 빠져나가는 필라멘트가 너무 적고 압출 종료 후에 과도한 필라멘트가 압출된다는 사실을 발견하는 것이 일반적입니다. 이것을 흔히 "ooze"라고 합니다.
 
 ![ooze](img/ooze.svg.png)
 
-The "pressure advance" system attempts to account for this by using a
-different model for the extruder. Instead of naively believing that
-each mm^3 of filament fed into the extruder will result in that amount
-of mm^3 immediately exiting the extruder, it uses a model based on
-pressure. Pressure increases when filament is pushed into the extruder
-(as in [Hooke's law](https://en.wikipedia.org/wiki/Hooke%27s_law)) and
-the pressure necessary to extrude is dominated by the flow rate
-through the nozzle orifice (as in
-[Poiseuille's law](https://en.wikipedia.org/wiki/Poiseuille_law)). The
-key idea is that the relationship between filament, pressure, and flow
-rate can be modeled using a linear coefficient:
+"압력 조절" 시스템은 익스트루더에 대해 다른 모델을 사용하여 이를 설명하려고 시도합니다. 익스트루더로 공급되는 필라멘트의 각 mm^3가 익스트루더에서 즉시 나오는 mm^3의 양을 초래할 것이라고 순진하게 믿는 대신 압력을 기반으로 한 모델을 사용합니다. 필라멘트가 익스트루더로 밀릴 때 압력이 증가하고([Hooke의 법칙](https://en.wikipedia.org/wiki/Hooke%27s_law)에서와 같이) 압출에 필요한 압력은 노즐 오리피스를 통한 유량에 의해 지배됩니다. ([Poiseuille의 법칙](https://en.wikipedia.org/wiki/Poiseuille_law)에서와 같이).
+
+핵심 아이디어는 필라멘트, 압력 및 유속 간의 관계를 선형 계수를 사용하여 모델링할 수 있다는 것입니다:
 ```
 pa_position = nominal_position + pressure_advance_coefficient * nominal_velocity
 ```
 
-See the [pressure advance](Pressure_Advance.md) document for
-information on how to find this pressure advance coefficient.
+이 압력 조절 계수를 찾는 방법에 대한 정보는 [압력 조절](Pressure_Advance.md) 문서를 참조하십시오.
 
-The basic pressure advance formula can cause the extruder motor to
-make sudden velocity changes. Klipper implements "smoothing" of the
-extruder movement to avoid this.
+기본 압력 조절 공식으로 인해 익스트루더 모터가 급격한 속도 변화를 일으킬 수 있습니다. Klipper는 이를 피하기 위해 익스트루더 움직임의 "smoothing"를 구현합니다.
 
-![pressure-advance](img/pressure-velocity.png)
+![압력-조절](img/pressure-velocity.png)
 
-The above graph shows an example of two extrusion moves with a
-non-zero cornering velocity between them. Note that the pressure
-advance system causes additional filament to be pushed into the
-extruder during acceleration. The higher the desired filament flow
-rate, the more filament must be pushed in during acceleration to
-account for pressure. During head deceleration the extra filament is
-retracted (the extruder will have a negative velocity).
+위의 그래프는 0이 아닌 코너링 속도가 있는 두 개의 돌출 움직임의 예를 보여줍니다. 압력 조절 시스템은 가속 중에 추가 필라멘트를 압출기로 밀어 넣습니다. 원하는 필라멘트 유속이 높을수록 압력에 대응하기 위해 가속 중에 더 많은 필라멘트를 밀어 넣어야 합니다. 헤드 감속 중에 추가 필라멘트가 리트렉션 됩니다. (익스트루더는 음의 속도를 가짐).
 
-The "smoothing" is implemented using a weighted average of the
-extruder position over a small time period (as specified by the
-`pressure_advance_smooth_time` config parameter). This averaging can
-span multiple g-code moves. Note how the extruder motor will start
-moving prior to the nominal start of the first extrusion move and will
-continue to move after the nominal end of the last extrusion move.
+"smoothing"은 짧은 기간 동안 익스트루더 위치의 가중 평균을 사용하여 구현됩니다(`pressure_advance_smooth_time` config 매개변수로 결정됨). 이 평균화는 여러 g-code 이동에 걸쳐 있을 수 있습니다. 압출기 모터가 첫 번째 압출 이동의 시작 이전에 어떻게 움직이기 시작하고 마지막 압출 이동의 종료 후에도 계속 움직이는지 확인하십시오.
 
-Key formula for "smoothed pressure advance":
+"smoothed 압력 조절"의 핵심 공식:
 ```
 smooth_pa_position(t) =
     ( definitive_integral(pa_position(x) * (smooth_time/2 - abs(t - x)) * dx,
