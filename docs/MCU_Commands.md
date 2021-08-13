@@ -77,185 +77,139 @@ a data dictionary (see [protocol](Protocol.md) for more information).
 
 ### 일반적인 마이크로 컨트롤러 오브젝트
 
-This section lists some commonly used config commands.
+이 섹션에는 일반적으로 사용되는 몇 가지 config 명령이 나열되어 있습니다.
 
 * `config_digital_out oid=%c pin=%u value=%c default_value=%c
-  max_duration=%u` : This command creates an internal micro-controller
-  object for the given GPIO 'pin'. The pin will be configured in
-  digital output mode and set to an initial value as specified by
-  'value' (0 for low, 1 for high). Creating a digital_out object
-  allows the host to schedule GPIO updates for the given pin at
-  specified times (see the queue_digital_out command described below).
-  Should the micro-controller software go into shutdown mode then all
-  configured digital_out objects will be set to 'default_value'. The
-  'max_duration' parameter is used to implement a safety check - if it
-  is non-zero then it is the maximum number of clock ticks that the
-  host may set the given GPIO to a non-default value without further
-  updates. For example, if the default_value is zero and the
-  max_duration is 16000 then if the host sets the gpio to a value of
-  one then it must schedule another update to the gpio pin (to either
-  zero or one) within 16000 clock ticks. This safety feature can be
-  used with heater pins to ensure the host does not enable the heater
-  and then go off-line.
+  max_duration=%u` : 이 명령은 주어진 GPIO '핀'에 대한 내부 마이크로 컨트롤러 객체를 만듭니다. 
+  디지털 출력 모드에서 구성되고 'value'(낮음은 0, 높음은 1)로 지정된 초기 값으로 설정됩니다. 
+  digital_out 객체를 생성하면 호스트가 지정된 시간에 지정된 핀에 대한 GPIO 업데이트를 예약할 수 
+  있습니다 (아래에 설명된 queue_digital_out 명령 참조). 마이크로 컨트롤러 소프트웨어가 종료 
+  모드로 전환되면 구성된 모든 digital_out 개체가 'default_value'로 설정됩니다. 
+  'max_duration' 매개변수는 안전 검사를 구현하는 데 사용됩니다. 0이 아니면 호스트가 추가 
+  업데이트 없이 지정된 GPIO를 기본값이 아닌 값으로 설정할 수 있는 최대 클록 틱 수입니다. 
+  예를 들어 default_value가 0이고 max_duration이 16000이면 호스트가 gpio를 1의 값으로 
+  설정하면 16000 클럭 틱 내에서 gpio 핀에 대한 또 다른 업데이트(0 또는 1)를 예약해야 합니다. 
+  이 안전 기능을 히터 핀과 함께 사용하여 호스트가 히터를 활성화한 다음 오프라인으로 전환하지 않도록 
+  할 수 있습니다.
 
 * `config_pwm_out oid=%c pin=%u cycle_ticks=%u value=%hu
-  default_value=%hu max_duration=%u` : This command creates an
-  internal object for hardware based PWM pins that the host may
-  schedule updates for. Its usage is analogous to config_digital_out -
-  see the description of the 'set_pwm_out' and 'config_digital_out'
-  commands for parameter description.
+  default_value=%hu max_duration=%u` : 이 명령은 호스트가 업데이트를 예약할 수 있는 
+  하드웨어 기반 PWM 핀에 대한 내부 개체를 만듭니다. 사용법은 config_digital_out과 유사합니다. 
+  매개변수 설명은 'set_pwm_out' 및 'config_digital_out' 명령에 대한 설명을 참조하세요.
 
-* `config_analog_in oid=%c pin=%u` : This command is used to configure
-  a pin in analog input sampling mode. Once configured, the pin can be
-  sampled at regular interval using the query_analog_in command (see
-  below).
+* `config_analog_in oid=%c pin=%u` : 이 명령은 아날로그 입력 샘플링 모드에서 핀을 구성하는 
+  데 사용됩니다. 일단 구성되면 query_analog_in 명령을 사용하여 일정한 간격으로 핀을 샘플링할 
+  수 있습니다(아래 참조).
 
-* `config_stepper oid=%c step_pin=%c dir_pin=%c invert_step=%c` : This
-  command creates an internal stepper object. The 'step_pin' and
-  'dir_pin' parameters specify the step and direction pins
-  respectively; this command will configure them in digital output
-  mode. The 'invert_step' parameter specifies whether a step occurs on
-  a rising edge (invert_step=0) or falling edge (invert_step=1).
+* `config_stepper oid=%c step_pin=%c dir_pin=%c invert_step=%c` : 이 명령은 내부 
+  스테퍼 개체를 만듭니다. 'step_pin' 및 'dir_pin' 매개변수는 각각 단계 및 방향 핀을 
+  지정합니다. 이 명령은 디지털 출력 모드에서 구성합니다. 'invert_step' 매개변수는 상승 
+  에지(invert_step=0) 또는 하강 에지(invert_step=1)에서 단계가 발생하는지 여부를 지정합니다.
 
-* `config_endstop oid=%c pin=%c pull_up=%c stepper_count=%c` : This
-  command creates an internal "endstop" object. It is used to specify
-  the endstop pins and to enable "homing" operations (see the
-  endstop_home command below). The command will configure the
-  specified pin in digital input mode. The 'pull_up' parameter
-  determines whether hardware provided pullup resistors for the pin
-  (if available) will be enabled. The 'stepper_count' parameter
-  specifies the maximum number of steppers that this endstop may need
-  to halt during a homing operation (see endstop_home below).
+* `config_endstop oid=%c pin=%c pull_up=%c stepper_count=%c` : 이 명령은 내부 
+  "endstop" 개체를 만듭니다. 엔드스톱 핀을 지정하고 "호밍" 작업을 활성화하는 데 사용됩니다
+  (아래 endstop_home 명령 참조). 이 명령은 디지털 입력 모드에서 지정된 핀을 구성합니다. 
+  'pull_up' 매개변수는 핀에 대한 하드웨어 제공 풀업 저항(사용 가능한 경우)이 활성화되는지 
+  여부를 결정합니다. 'stepper_count' 매개변수는 이 엔드스톱이 원점 복귀 작업 동안 중지해야 
+  할 수 있는 최대 스테퍼 수를 지정합니다(아래 endstop_home 참조).
 
 * `config_spi oid=%c bus=%u pin=%u mode=%u rate=%u shutdown_msg=%*s` :
-  This command creates an internal SPI object. It is used with
-  spi_transfer and spi_send commands (see below).  The "bus"
-  identifies the SPI bus to use (if the micro-controller has more than
-  one SPI bus available). The "pin" specifies the chip select (CS) pin
-  for the device. The "mode" is the SPI mode (should be between 0 and
-  3). The "rate" parameter specifies the SPI bus rate (in cycles per
-  second). Finally, the "shutdown_msg" is an SPI command to send to
-  the given device should the micro-controller go into a shutdown
-  state.
+  이 명령은 내부 SPI 개체를 만듭니다. spi_transfer 및 spi_send 명령과 함께 사용됩니다
+  (아래 참조). "버스"는 사용할 SPI 버스를 식별합니다(마이크로 컨트롤러에 사용 가능한 SPI 버스가 
+  두 개 이상 있는 경우). "핀"은 장치의 칩 선택(CS) 핀을 지정합니다. "모드"는 SPI 모드입니다
+  (0과 3 사이여야 함). "rate" 매개변수는 SPI 버스 속도(초당 사이클)를 지정합니다. 
+  마지막으로 "shutdown_msg"는 마이크로 컨트롤러가 종료 상태가 될 경우 지정된 장치에 
+  보내는 SPI 명령입니다.
 
 * `config_spi_without_cs oid=%c bus=%u mode=%u rate=%u
-  shutdown_msg=%*s` : This command is similar to config_spi, but
-  without a CS pin definition. It is useful for SPI devices that do
-  not have a chip select line.
+  shutdown_msg=%*s` : 이 명령은 config_spi와 유사하지만 CS 핀 정의가 없습니다. 
+  칩 선택 라인이 없는 SPI 장치에 유용합니다.
 
 ## 일반적인 명령
 
-This section lists some commonly used run-time commands. It is likely
-only of interest to developers looking to gain insight into Klipper.
+이 섹션에서는 일반적으로 사용되는 몇 가지 런타임 명령을 나열합니다. 
+Klipper 에 대한 통찰력을 얻으려는 개발자에게만 관심이 있을 것입니다.
 
-* `set_digital_out_pwm_cycle oid=%c cycle_ticks=%u` : This command
-  configures a digital output pin (as created by config_digital_out)
-  to use "software PWM". The 'cycle_ticks' is the number of clock
-  ticks for the PWM cycle. Because the output switching is implemented
-  in the micro-controller software, it is recommended that
-  'cycle_ticks' correspond to a time of 10ms or greater.
+* `set_digital_out_pwm_cycle oid=%c cycle_ticks=%u` : 이 명령은 "소프트웨어 
+  PWM"을 사용하도록 디지털 출력 핀(config_digital_out에 의해 생성됨)을 구성합니다.
+  'cycle_ticks'는 PWM 주기의 클록 틱 수입니다. 출력 스위칭은 마이크로 컨트롤러 
+  소프트웨어에서 구현되기 때문에 'cycle_ticks'는 10ms 이상의 시간에 해당하는 것이 좋습니다.
 
-* `queue_digital_out oid=%c clock=%u on_ticks=%u` : This command will
-  schedule a change to a digital output GPIO pin at the given clock
-  time. To use this command a 'config_digital_out' command with the
-  same 'oid' parameter must have been issued during micro-controller
-  configuration. If 'set_digital_out_pwm_cycle' has been called then
-  'on_ticks' is the on duration (in clock ticks) for the pwm cycle.
-  Otherwise, 'on_ticks' should be either 0 (for low voltage) or 1 (for
-  high voltage).
+* `queue_digital_out oid=%c clock=%u on_ticks=%u` : 이 명령은 주어진 클록 시간에 
+  디지털 출력 GPIO 핀에 대한 변경을 예약합니다. 이 명령을 사용하려면 마이크로 컨트롤러 구성 
+  중에 동일한 'oid' 매개변수를 사용하여 'config_digital_out' 명령을 실행해야 합니다.
+  'set_digital_out_pwm_cycle'이 호출된 경우 'on_ticks'는 pwm 주기의 온 지속 
+  시간 (클록 틱 단위)입니다. 그렇지 않으면 'on_ticks'는 0 (low voltage) 또는 
+  1 (high voltage)이어야 합니다.
 
-* `queue_pwm_out oid=%c clock=%u value=%hu` : Schedules a change to a
-  hardware PWM output pin. See the 'queue_digital_out' and
-  'config_pwm_out' commands for more info.
+* `queue_pwm_out oid=%c clock=%u value=%hu` : 하드웨어 PWM 출력 핀에 대한 
+  변경을 예약합니다. 자세한 내용은 'queue_digital_out' 및 'config_pwm_out' 
+  명령을 참조하세요.
 
 * `query_analog_in oid=%c clock=%u sample_ticks=%u sample_count=%c
-  rest_ticks=%u min_value=%hu max_value=%hu` : This command sets up a
-  recurring schedule of analog input samples. To use this command a
-  'config_analog_in' command with the same 'oid' parameter must have
-  been issued during micro-controller configuration. The samples will
-  start as of 'clock' time, it will report on the obtained value every
-  'rest_ticks' clock ticks, it will over-sample 'sample_count' number
-  of times, and it will pause 'sample_ticks' number of clock ticks
-  between over-sample samples. The 'min_value' and 'max_value'
-  parameters implement a safety feature - the micro-controller
-  software will verify the sampled value (after any oversampling) is
-  always between the supplied range. This is intended for use with
-  pins attached to thermistors controlling heaters - it can be used to
-  check that a heater is within a temperature range.
+  rest_ticks=%u min_value=%hu max_value=%hu` : 이 명령은 아날로그 입력 샘플의 반복 
+  일정을 설정합니다. 이 명령을 사용하려면 마이크로 컨트롤러 구성 중에 동일한 'oid' 매개변수를 
+  사용하여 'config_analog_in' 명령을 실행해야 합니다. 샘플은 '클럭' 시간부터 시작하고, 
+  'rest_ticks' 클럭 틱마다 얻은 값을 보고하고, 'sample_count'번 오버샘플링하고, 
+  'sample_ticks' 클럭 틱 수를 일시 중지합니다. 'min_value' 및 'max_value' 매개변수는 
+  안전 기능을 구현합니다. 마이크로 컨트롤러 소프트웨어는 샘플링된 값(오버샘플링 후)이 항상 
+  제공된 범위 사이에 있는지 확인합니다. 이것은 히터를 제어하는 서미스터에 부착된 핀과 함께 
+  사용하기 위한 것입니다. 히터가 온도 범위 내에 있는지 확인하는 데 사용할 수 있습니다.
 
-* `get_clock` : This command causes the micro-controller to generate a
-  "clock" response message. The host sends this command once a second
-  to obtain the value of the micro-controller clock and to estimate
-  the drift between host and micro-controller clocks. It enables the
-  host to accurately estimate the micro-controller clock.
+* `get_clock` : 이 명령은 마이크로 컨트롤러가 "clock" 응답 메시지를 생성하도록 합니다.
+  호스트는 이 명령을 1초에 한 번 전송하여 마이크로 컨트롤러 클록의 값을 얻고 호스트와 마이크로 
+  컨트롤러 클록 간의 드리프트를 추정합니다.이를 통해 호스트는 마이크로 컨트롤러 clock을 정확하게
+  추정할 수 있습니다. 
 
 ### 스테퍼 명령
 
-* `queue_step oid=%c interval=%u count=%hu add=%hi` : This command
-  schedules 'count' number of steps for the given stepper, with
-  'interval' number of clock ticks between each step. The first step
-  will be 'interval' number of clock ticks since the last scheduled
-  step for the given stepper. If 'add' is non-zero then the interval
-  will be adjusted by 'add' amount after each step. This command
-  appends the given interval/count/add sequence to a per-stepper
-  queue. There may be hundreds of these sequences queued during normal
-  operation. New sequence are appended to the end of the queue and as
-  each sequence completes its 'count' number of steps it is popped
-  from the front of the queue. This system allows the micro-controller
-  to queue potentially hundreds of thousands of steps - all with
-  reliable and predictable schedule times.
+* `queue_step oid=%c interval=%u count=%hu add=%hi` : 이 명령은 각 단계 사이의 '간격' 
+  클럭 틱 수와 함께 지정된 스테퍼에 대한 '카운트' 단계 수를 예약합니다. 첫 번째 단계는 주어진 
+  스테퍼에 대해 마지막으로 예약된 단계 이후의 클럭 틱의 '간격' 수입니다. '추가'가 0이 아닌 경우 
+  간격은 각 단계 후에 '추가' 양만큼 조정됩니다. 이 명령은 지정된 간격/카운트/추가 시퀀스를 스테퍼별 
+  대기열에 추가합니다. 정상 작동 중에 이러한 시퀀스가 수백 개 있을 수 있습니다. 새 시퀀스가 
+  대기열 끝에 추가되고 각 시퀀스가 '카운트' 단계 수를 완료할 때 대기열 앞에서 팝됩니다. 이 시스템을 
+  통해 마이크로 컨트롤러는 잠재적으로 수십만 단계를 대기열에 넣을 수 있습니다. 모두 안정적이고 예측 
+  가능한 일정 시간으로 이루어집니다.
 
-* `set_next_step_dir oid=%c dir=%c` : This command specifies the value
-  of the dir_pin that the next queue_step command will use.
+* `set_next_step_dir oid=%c dir=%c` : 이 명령은 다음 queue_step 명령이 사용할 dir_pin 
+  값을 지정합니다.
 
-* `reset_step_clock oid=%c clock=%u` : Normally, step timing is
-  relative to the last step for a given stepper. This command resets
-  the clock so that the next step is relative to the supplied 'clock'
-  time. The host usually only sends this command at the start of a
-  print.
+* `reset_step_clock oid=%c clock=%u` : 일반적으로 단계 타이밍은 주어진 스테퍼의 마지막 
+  단계에 상대적입니다. 이 명령은 다음 단계가 제공된 '시계' 시간을 기준으로 하도록 시계를 재설정합니다.
+  호스트는 일반적으로 인쇄 시작 시에만 이 명령을 보냅니다.
 
-* `stepper_get_position oid=%c` : This command causes the
-  micro-controller to generate a "stepper_position" response message
-  with the stepper's current position. The position is the total
-  number of steps generated with dir=1 minus the total number of steps
-  generated with dir=0.
+* `stepper_get_position oid=%c` : 이 명령은 마이크로 컨트롤러가 스테퍼의 현재 위치와 함께 
+  "stepper_position" 응답 메시지를 생성하도록 합니다. 위치는 dir=1 로 생성된 총 단계 수에서 
+  dir=0 으로 생성된 총 단계 수를 뺀 것입니다.
 
 * `endstop_home oid=%c clock=%u sample_ticks=%u sample_count=%c
-  rest_ticks=%u pin_value=%c` : This command is used during stepper
-  "homing" operations. To use this command a 'config_endstop' command
-  with the same 'oid' parameter must have been issued during
-  micro-controller configuration. When this command is invoked, the
-  micro-controller will sample the endstop pin every 'rest_ticks'
-  clock ticks and check if it has a value equal to 'pin_value'. If the
-  value matches (and it continues to match for 'sample_count'
-  additional samples spread 'sample_ticks' apart) then the movement
-  queue for the associated stepper will be cleared and the stepper
-  will come to an immediate halt. The host uses this command to
-  implement homing - the host instructs the endstop to sample for the
-  endstop trigger and then it issues a series of queue_step commands
-  to move a stepper towards the endstop. Once the stepper hits the
-  endstop, the trigger will be detected, the movement halted, and the
-  host notified.
+  rest_ticks=%u pin_value=%c` : 이 명령은 스테퍼 "호밍" 작업 중에 사용됩니다. 이 명령을 
+  사용하려면 마이크로 컨트롤러 구성 중에 동일한 'oid' 매개변수를 사용하여 'config_endstop' 
+  명령을 실행해야 합니다. 이 명령이 호출되면 마이크로 컨트롤러는 'rest_ticks' 클록 틱마다 
+  엔드스톱 핀을 샘플링하고 'pin_value'와 같은 값이 있는지 확인합니다. 값이 일치하면 
+  (그리고 'sample_count' 추가 샘플이 'sample_ticks' 간격으로 계속 일치하면) 연결된 스테퍼의 
+  이동 대기열이 지워지고 스테퍼가 즉시 중지됩니다. 호스트는 이 명령을 사용하여 homing을 구현합니다.
+  호스트는 endstop에 endstop 트리거에 대한 샘플링을 지시한 다음 일련의 queue_step 명령을 
+  실행하여 스테퍼를 endstop으로 이동시킵니다. 스테퍼가 엔드스톱에 도달하면 트리거가 감지되고 
+  이동이 중지되며 호스트에 알림이 표시됩니다.
 
 ### Move queue
 
-Each queue_step command utilizes an entry in the micro-controller
-"move queue". This queue is allocated when it receives the
-"finalize_config" command, and it reports the number of available
-queue entries in "config" response messages.
+각 queue_step 명령은 마이크로 컨트롤러 "move queue"의 항목을 활용합니다. 
+이 큐는 "finalize_config" 명령을 수신할 때 할당되며 "config" 응답 메시지에 사용 
+가능한 큐 항목 수를 보고합니다.
 
-It is the responsibility of the host to ensure that there is available
-space in the queue before sending a queue_step command. The host does
-this by calculating when each queue_step command completes and
-scheduling new queue_step commands accordingly.
+queue_step 명령을 보내기 전에 큐에 사용 가능한 공간이 있는지 확인하는 것은 호스트의 
+책임입니다. 호스트는 각 queue_step 명령이 완료될 때를 계산하고 그에 따라 새 
+queue_step 명령을 예약하여 이를 수행합니다.
 
 ### SPI 명령
 
-* `spi_transfer oid=%c data=%*s` : This command causes the
-  micro-controller to send 'data' to the spi device specified by 'oid'
-  and it generates a "spi_transfer_response" response message with the
-  data returned during the transmission.
+* `spi_transfer oid=%c data=%*s` : 이 명령은 마이크로 컨트롤러가 'oid'로 지정된 
+  spi 장치에 '데이터'를 보내도록 하고 전송 중에 반환된 데이터로 "spi_transfer_response" 
+  응답 메시지를 생성합니다.
 
-* `spi_send oid=%c data=%*s` : This command is similar to
-  "spi_transfer", but it does not generate a "spi_transfer_response"
-  message.
+* `spi_send oid=%c data=%*s` : 이 명령은 "spi_transfer"와 유사하지만 
+  "spi_transfer_response" 메시지를 생성하지 않습니다.
+
