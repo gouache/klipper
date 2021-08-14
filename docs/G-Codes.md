@@ -193,65 +193,100 @@ Klipper는 일반 구성 및 상태에 대해 "확장된" G-Code 명령을 사�
 
 ### 매크로 명령
 
-The following command is available when a [gcode_macro config section](Config_Reference.md#gcode_macro) is enabled (also see the [command templates guide](Command_Templates.md)):
-- `SET_GCODE_VARIABLE MACRO=<macro_name> VARIABLE=<name> VALUE=<value>`: This command allows one to change the value of a gcode_macro variable at run-time. The provided VALUE is parsed as a Python literal.
+다음 명령은 [gcode_macro config section](Config_Reference.md#gcode_macro)이 
+활성화된 경우 사용할 수 있습니다([command templates guide](Command_Templates.md) 참조):
+- `SET_GCODE_VARIABLE MACRO=<macro_name> VARIABLE=<name> VALUE=<value>`: 
+  이 명령을 사용하면 런타임에 gcode_macro 변수의 값을 변경할 수 있습니다. 
+  제공된 VALUE는 Python 리터럴로 구문 분석됩니다.
 
 ### 사용자 정의 핀 명령
 
-The following command is available when an [output_pin config section](Config_Reference.md#output_pin) is enabled:
+다음 명령은 [output_pin config section](Config_Reference.md#output_pin)이 
+활성화된 경우 사용할 수 있습니다.
 - `SET_PIN PIN=config_name VALUE=<value> CYCLE_TIME=<cycle_time>`
 
-Note: Hardware PWM does not currently support the CYCLE_TIME parameter and will use the cycle time defined in the config.
+참고: 하드웨어 PWM 은 현재 CYCLE_TIME 매개변수를 지원하지 않으며 config 에 정의된 주기 시간을 사용합니다.
 
 ### 수동으로 제어되는 팬 명령
 
-The following command is available when a [fan_generic config section](Config_Reference.md#fan_generic) is enabled:
-- `SET_FAN_SPEED FAN=config_name SPEED=<speed>` This command sets the speed of a fan. <speed> must be between 0.0 and 1.0.
+e[fan_generic config section](Config_Reference.md#fan_generic) 이 
+활성화된 경우 다음 명령을 사용할 수 있습니다
+- `SET_FAN_SPEED FAN=config_name SPEED=<speed>` 
+  이 명령은 팬의 속도를 설정합니다. <speed>는 0.0에서 1.0 사이여야 합니다.
 
 ### Neopixel 및 Dotstar 명령
 
-The following command is available when a [neopixel config section](Config_Reference.md#neopixel) or [dotstar config section](Config_Reference.md#dotstar) is enabled:
-- `SET_LED LED=<config_name> RED=<value> GREEN=<value> BLUE=<value> WHITE=<value> [INDEX=<index>] [TRANSMIT=0] [SYNC=1]`: This sets the LED output. 
-  Each color `<value>` must be between 0.0 and 1.0. The WHITE option is only valid on RGBW LEDs. If multiple LED chips are daisy-chained then one may specify INDEX to alter the color of just the given chip (1 for the first chip, 2 for the second, etc.). 
-  If INDEX is not provided then all LEDs in the daisy-chain will be set to the provided color. 
-  If TRANSMIT=0 is specified then the color change will only be made on the next SET_LED command that does not specify TRANSMIT=0; this may be useful in combination with the INDEX parameter to batch multiple updates in a daisy-chain. 
-  By default, the SET_LED command will sync it's changes with other ongoing gcode commands. This can lead to undesirable behavior if LEDs are being set while the printer is not printing as it will reset the idle timeout. 
-  If careful timing is not needed, the optional SYNC=0 parameter can be specified to apply the changes instantly and not reset the idle timeout.
+다음 명령은 [neopixel config section](Config_Reference.md#neopixel) 또는 
+[dotstar config section](Config_Reference.md#dotstar)이 활성화된 경우 사용할 수 있습니다:
+- `SET_LED LED=<config_name> RED=<value> GREEN=<value> 
+  BLUE=<value> WHITE=<value> [INDEX=<index>] [TRANSMIT=0] [SYNC=1]`: 
+  LED 출력을 설정합니다.
+  각 색상 `<value>`은 0.0에서 1.0 사이여야 합니다. WHITE 옵션은 RGBW LED에서만 유효합니다. 
+  여러 LED 칩이 데이지 체인 방식으로 연결되어 있는 경우 INDEX를 지정하여 주어진 칩의 
+  색상만 변경할 수 있습니다 (첫 번째 칩은 1, 두 번째 칩은 2 등). 
+  INDEX가 제공되지 않으면 데이지 체인의 모든 LED 가 제공된 색상으로 설정됩니다. 
+  TRANSMIT=0 이 지정되면 색상 변경은 TRANSMIT=0 을 지정하지 않는 다음 SET_LED 명령에서만 
+  이루어집니다; 이것은 데이지 체인에서 여러 업데이트를 일괄 처리하기 위해 INDEX 매개변수와 함께 
+  유용할 수 있습니다. 기본적으로 SET_LED 명령은 변경 사항을 진행 중인 다른 gcode 명령과 
+  동기화합니다. 이것은 유휴 시간 초과를 재설정하므로 프린터가 인쇄하지 않는 동안 LED가 설정되는 
+  경우 바람직하지 않은 동작으로 이어질 수 있습니다. 신중한 타이밍이 필요하지 않은 경우 선택적 
+  SYNC=0 매개변수를 지정하여 변경 사항을 즉시 적용하고 유휴 시간 초과를 재설정하지 않을 수 있습니다.
 
 ### 서보 명령어
 
-The following commands are available when a [servo config section](Config_Reference.md#servo) is enabled:
-- `SET_SERVO SERVO=config_name [ANGLE=<degrees> | WIDTH=<seconds>]`: Set the servo position to the given angle (in degrees) or pulse width (in seconds). Use `WIDTH=0` to disable the servo output.
+ [servo config section](Config_Reference.md#servo) 이 활성화된 경우 다음 명령을 
+ 사용할 수 있습니다:
+- `SET_SERVO SERVO=config_name [ANGLE=<degrees> | WIDTH=<seconds>]`: 
+  서보 위치를 주어진 각도(도 단위) 또는 펄스 폭(초 단위)으로 설정합니다. 서보 출력을 
+  비활성화하려면 `WIDTH=0`을 사용하십시오.
 
 ### 수동 스테퍼 명령
 
-The following command is available when a [manual_stepper config section](Config_Reference.md#manual_stepper) is enabled:
-- `MANUAL_STEPPER STEPPER=config_name [ENABLE=[0|1]] [SET_POSITION=<pos>] [SPEED=<speed>] [ACCEL=<accel>] [MOVE=<pos> [STOP_ON_ENDSTOP=[1|2|-1|-2]] [SYNC=0]]`: This command will alter the state of the stepper. Use the ENABLE parameter to enable/disable the stepper. 
-  Use the SET_POSITION parameter to force the stepper to think it is at the given position. Use the MOVE parameter to request a movement to the given position. 
-  If SPEED and/or ACCEL is specified then the given values will be used instead of the defaults specified in the config file. 
-  If an ACCEL of zero is specified then no acceleration will be performed. 
-  If STOP_ON_ENDSTOP=1 is specified then the move will end early should the endstop report as triggered (use STOP_ON_ENDSTOP=2 to complete the move without error even if the endstop does not trigger, use -1 or -2 to stop when the endstop reports not triggered). 
-  Normally future G-Code commands will be scheduled to run after the stepper move completes, however if a manual stepper move uses SYNC=0 then future G-Code movement commands may run in parallel with the stepper movement.
+다음 명령은 [manual_stepper config section](Config_Reference.md#manual_stepper)이 
+활성화된 경우 사용할 수 있습니다.
+- `MANUAL_STEPPER STEPPER=config_name [ENABLE=[0|1]] [SET_POSITION=<pos>] 
+  [SPEED=<speed>] [ACCEL=<accel>] [MOVE=<pos> [STOP_ON_ENDSTOP=[1|2|-1|-2]] 
+  [SYNC=0]]`: 이 명령은 스테퍼의 상태를 변경합니다. ENABLE 매개변수를 사용하여 스테퍼를 
+  활성화/비활성화합니다. SET_POSITION 매개변수를 사용하여 스테퍼가 지정된 위치에 있다고 
+  생각하도록 합니다. MOVE 매개변수를 사용하여 지정된 위치로 이동을 요청합니다. 
+  SPEED 및/또는 ACCEL이 지정되면 구성 파일에 지정된 기본값 대신 지정된 값이 사용됩니다.
+  0의 ACCEL이 지정되면 가속이 수행되지 않습니다. STOP_ON_ENDSTOP=1 이 지정되면 endstop 
+  보고서가 트리거되면 이동이 일찍 종료됩니다 (엔드스톱이 트리거되지 않더라도 오류 없이 이동을 
+  완료하려면 STOP_ON_ENDSTOP=2를 사용하고, 엔드스톱이 트리거되지 않았다고 보고할 때 중지하려면 
+  -1 또는 -2를 사용).
+  일반적으로 향후 G-Code 명령은 스테퍼 이동이 완료된 후 실행되도록 예약되지만 수동 스테퍼 이동이 
+  SYNC=0을 사용하는 경우 향후 G-Code 이동 명령은 스테퍼 이동과 병렬로 실행될 수 있습니다.
 
 ### 익스트루더 스테퍼 명령
 
-The following command is available when an [extruder_stepper config section](Config_Reference.md#extruder_stepper) is enabled:
-- `SYNC_STEPPER_TO_EXTRUDER STEPPER=<extruder_stepper config_name> [EXTRUDER=<extruder config_name>]`: This command will cause the given STEPPER to become synchronized to the given EXTRUDER, overriding the extruder defined in the "extruder_stepper" config section.
+다음 명령은 [extruder_stepper config section](Config_Reference.md#extruder_stepper) 
+이 활성화된 경우 사용할 수 있습니다:
+- `SYNC_STEPPER_TO_EXTRUDER STEPPER=<extruder_stepper config_name> 
+  [EXTRUDER=<extruder config_name>]`: 이 명령은 지정된 STEPPER가 "extruder_stepper" 
+  구성 섹션에 정의된 압출기를 재정의하여 지정된 EXTRUDER와 동기화되도록 합니다.
 
 ### 프로브
 
-The following commands are available when a [probe config section](Config_Reference.md#probe) is enabled (also see the [probe calibrate guide](Probe_Calibrate.md)):
-- `PROBE [PROBE_SPEED=<mm/s>] [LIFT_SPEED=<mm/s>] [SAMPLES=<count>] [SAMPLE_RETRACT_DIST=<mm>] [SAMPLES_TOLERANCE=<mm>] [SAMPLES_TOLERANCE_RETRIES=<count>] [SAMPLES_RESULT=median|average]`: Move the nozzle downwards until the probe triggers. 
-  If any of the optional parameters are provided they override their equivalent setting in the [probe config section](Config_Reference.md#probe).
-- `QUERY_PROBE`: Report the current status of the probe ("triggered" or "open").
-- `PROBE_ACCURACY [PROBE_SPEED=<mm/s>] [SAMPLES=<count>] [SAMPLE_RETRACT_DIST=<mm>]`: Calculate the maximum, minimum, average, median, and standard deviation of multiple probe samples. 
-  By default, 10 SAMPLES are taken. Otherwise the optional parameters default to their equivalent setting in the probe config section.
-- `PROBE_CALIBRATE [SPEED=<speed>] [<probe_parameter>=<value>]`: Run a helper script useful for calibrating the probe's z_offset. 
-  See the PROBE command for details on the optional probe parameters. See the MANUAL_PROBE command for details on the SPEED parameter and the additional commands available while the tool is active. 
-  Please note, the PROBE_CALIBRATE command uses the speed variable to move in XY direction as well as Z.
+다음 명령은 [probe config section](Config_Reference.md#probe)이 
+활성화된 경우 사용할 수 있습니다([probe calibrate guide](Probe_Calibrate.md) 참조):
+- `PROBE [PROBE_SPEED=<mm/s>] [LIFT_SPEED=<mm/s>] [SAMPLES=<count>] 
+  [SAMPLE_RETRACT_DIST=<mm>] [SAMPLES_TOLERANCE=<mm>] 
+  [SAMPLES_TOLERANCE_RETRIES=<count>] [SAMPLES_RESULT=median|average]`: 
+  프로브가 트리거될 때까지 노즐을 아래로 이동합니다. 선택적 매개변수가 제공되면 
+  [probe config section](Config_Reference.md#probe) 에서 해당 설정을 재정의합니다.
+- `QUERY_PROBE`: 프로브의 현재 상태를 보고합니다("triggered" 또는 "open").
+- `PROBE_ACCURACY [PROBE_SPEED=<mm/s>] [SAMPLES=<count>] 
+  [SAMPLE_RETRACT_DIST=<mm>]`: 여러 프로브 샘플의 최대, 최소, 평균, 중앙값 및 표준 
+  편차를 계산합니다. 기본적으로 10개의 샘플이 사용됩니다. 그렇지 않으면 선택적 매개변수는 
+  기본적으로 프로브 구성 섹션의 해당 설정으로 설정됩니다.
+- `PROBE_CALIBRATE [SPEED=<speed>] [<probe_parameter>=<value>]`: 
+  프로브의 z_offset 을 보정하는 데 유용한 도우미 스크립트를 실행합니다.
+  선택적 프로브 매개변수에 대한 자세한 내용은 PROBE 명령을 참조하십시오. 
+  SPEED 매개변수 및 도구가 활성화되어 있는 동안 사용할 수 있는 추가 명령에 대한 자세한 내용은 MANUAL_PROBE 명령을 참조하십시오.
+  PROBE_CALIBRATE 명령은 속도 변수를 사용하여 Z뿐만 아니라 XY 방향으로 이동합니다.
 - `Z_OFFSET_APPLY_PROBE`: Take the current Z Gcode offset (aka, babystepping), and subtract if from the probe's z_offset.
-  This acts to take a frequently used babystepping value, and "make it permanent".  
-  Requires a `SAVE_CONFIG` to take effect.
+  이것은 자주 사용하는 베이비 스테핑 값을 가져 와서 "영구화"하는 역할을 합니다.
+  적용하려면 'SAVE_CONFIG'가 필요합니다.
 
 ### BLTouch
 
@@ -369,261 +404,158 @@ When the [sdcard_loop config section](Config_Reference.md#sdcard_loop) is enable
 
 ### Send message (respond) to host
 
-The following commands are availabe when the
-[respond config section](Config_Reference.md#respond) is enabled.
-- `M118 <message>`: echo the message prepended with the configured
-  default prefix (or `echo: ` if no prefix is configured).
-- `RESPOND MSG="<message>"`: echo the message prepended with the
-  configured default prefix (or `echo: ` if no prefix is configured).
-- `RESPOND TYPE=echo MSG="<message>"`: echo the message prepended with
-  `echo: `.
-- `RESPOND TYPE=command MSG="<message>"`: echo the message prepended
-  with `// `.  Octopint can be configured to respond to these messages
-  (e.g.  `RESPOND TYPE=command MSG=action:pause`).
-- `RESPOND TYPE=error MSG="<message>"`: echo the message prepended
-  with `!! `.
-- `RESPOND PREFIX=<prefix> MSG="<message>"`: echo the message
-  prepended with `<prefix>`. (The `PREFIX` parameter will take
-  priority over the `TYPE` parameter)
+The following commands are availabe when the [respond config section](Config_Reference.md#respond) is enabled.
+- `M118 <message>`: echo the message prepended with the configured default prefix (or `echo: ` if no prefix is configured).
+- `RESPOND MSG="<message>"`: echo the message prepended with the configured default prefix (or `echo: ` if no prefix is configured).
+- `RESPOND TYPE=echo MSG="<message>"`: echo the message prepended with `echo: `.
+- `RESPOND TYPE=command MSG="<message>"`: echo the message prepended with `// `.  Octopint can be configured to respond to these messages (e.g.  `RESPOND TYPE=command MSG=action:pause`).
+- `RESPOND TYPE=error MSG="<message>"`: echo the message prepended with `!! `.
+- `RESPOND PREFIX=<prefix> MSG="<message>"`: echo the message prepended with `<prefix>`. (The `PREFIX` parameter will take priority over the `TYPE` parameter)
 
 ### Pause Resume
 
-The following commands are available when the
-[pause_resume config section](Config_Reference.md#pause_resume) is
-enabled:
-- `PAUSE`: Pauses the current print. The current position is captured
-  for restoration upon resume.
-- `RESUME [VELOCITY=<value>]`: Resumes the print from a pause, first
-  restoring the previously captured position.  The VELOCITY parameter
-  determines the speed at which the tool should return to the original
-  captured position.
-- `CLEAR_PAUSE`: Clears the current paused state without resuming the
-  print. This is useful if one decides to cancel a print after a
-  PAUSE. It is recommended to add this to your start gcode to make
+The following commands are available when the [pause_resume config section](Config_Reference.md#pause_resume) is enabled:
+- `PAUSE`: Pauses the current print. The current position is captured for restoration upon resume.
+- `RESUME [VELOCITY=<value>]`: Resumes the print from a pause, first restoring the previously captured position.  The VELOCITY parameter determines the speed at which the tool should return to the original captured position.
+- `CLEAR_PAUSE`: Clears the current paused state without resuming the print. This is useful if one decides to cancel a print after a PAUSE. 
+  It is recommended to add this to your start gcode to make
   sure the paused state is fresh for each print.
 - `CANCEL_PRINT`: Cancels the current print.
 
 ### Filament Sensor
 
-The following command is available when the
-[filament_switch_sensor or filament_motion_sensor config section](Config_Reference.md#filament_switch_sensor)
-is enabled.
-- `QUERY_FILAMENT_SENSOR SENSOR=<sensor_name>`: Queries the current
-  status of the filament sensor. The data displayed on the terminal
-  will depend on the sensor type defined in the confguration.
-- `SET_FILAMENT_SENSOR SENSOR=<sensor_name> ENABLE=[0|1]`: Sets the
-  filament sensor on/off. If ENABLE is set to 0, the filament sensor
-  will be disabled, if set to 1 it is enabled.
+The following command is available when the [filament_switch_sensor or filament_motion_sensor config section](Config_Reference.md#filament_switch_sensor) is enabled.
+- `QUERY_FILAMENT_SENSOR SENSOR=<sensor_name>`: Queries the current status of the filament sensor. The data displayed on the terminal will depend on the sensor type defined in the confguration.
+- `SET_FILAMENT_SENSOR SENSOR=<sensor_name> ENABLE=[0|1]`: Sets the filament sensor on/off. If ENABLE is set to 0, the filament sensor will be disabled, if set to 1 it is enabled.
 
 ### Firmware Retraction
 
-The following commands are available when the
-[firmware_retraction config section](Config_Reference.md#firmware_retraction)
-is enabled. These commands allow you to utilise the firmware
-retraction feature available in many slicers, to reduce stringing
-during non-extrusion moves from one part of the print to another.
-Appropriately configuring pressure advance reduces the length of
-retraction required.
+The following commands are available when the [firmware_retraction config section](Config_Reference.md#firmware_retraction) is enabled. 
+These commands allow you to utilise the firmware retraction feature available in many slicers, to reduce stringing during non-extrusion moves from one part of the print to another.
+Appropriately configuring pressure advance reduces the length of retraction required.
 - `SET_RETRACTION [RETRACT_LENGTH=<mm>] [RETRACT_SPEED=<mm/s>]
-  [UNRETRACT_EXTRA_LENGTH=<mm>] [UNRETRACT_SPEED=<mm/s>]`: Adjust the
-  parameters used by firmware retraction. RETRACT_LENGTH determines
-  the length of filament to retract and unretract. The speed of
-  retraction is adjusted via RETRACT_SPEED, and is typically set
-  relatively high. The speed of unretraction is adjusted via
-  UNRETRACT_SPEED, and is not particularly critical, although often
-  lower than RETRACT_SPEED. In some cases it is useful to add a small
-  amount of additional length on unretraction, and this is set via
-  UNRETRACT_EXTRA_LENGTH. SET_RETRACTION is commonly set as part of
-  slicer per-filament configuration, as different filaments require
-  different parameter settings.
-- `GET_RETRACTION`: Queries the current parameters used by firmware
-  retraction and displays them on the terminal.
-- `G10`: Retracts the extruder using the currently configured
-  parameters.
-- `G11`: Unretracts the extruder using the currently configured
-  parameters.
+  [UNRETRACT_EXTRA_LENGTH=<mm>] [UNRETRACT_SPEED=<mm/s>]`: Adjust the parameters used by firmware retraction. RETRACT_LENGTH determines the length of filament to retract and unretract. 
+  The speed of retraction is adjusted via RETRACT_SPEED, and is typically set relatively high. 
+  The speed of unretraction is adjusted via UNRETRACT_SPEED, and is not particularly critical, although often lower than RETRACT_SPEED. In some cases it is useful to add a small amount of additional length on unretraction, and this is set via UNRETRACT_EXTRA_LENGTH. SET_RETRACTION is commonly set as part of slicer per-filament configuration, as different filaments require different parameter settings.
+- `GET_RETRACTION`: Queries the current parameters used by firmware retraction and displays them on the terminal.
+- `G10`: Retracts the extruder using the currently configured parameters.
+- `G11`: Unretracts the extruder using the currently configured parameters.
 
 ### Skew Correction
 
-The following commands are available when the
-[skew_correction config section](Config_Reference.md#skew_correction)
-is enabled (also see the [skew correction guide](skew_correction.md)):
+The following commands are available when the [skew_correction config section](Config_Reference.md#skew_correction) is enabled (also see the [skew correction guide](skew_correction.md)):
 - `SET_SKEW [XY=<ac_length,bd_length,ad_length>] [XZ=<ac,bd,ad>]
   [YZ=<ac,bd,ad>] [CLEAR=<0|1>]`: Configures the [skew_correction]
   module with measurements (in mm) taken from a calibration print.
-  One may enter measurements for any combination of planes, planes not
-  entered will retain their current value. If `CLEAR=1` is entered
-  then all skew correction will be disabled.
-- `GET_CURRENT_SKEW`: Reports the current printer skew for each plane
-  in both radians and degrees. The skew is calculated based on
-  parameters provided via the `SET_SKEW` gcode.
+  One may enter measurements for any combination of planes, planes not entered will retain their current value. If `CLEAR=1` is entered then all skew correction will be disabled.
+- `GET_CURRENT_SKEW`: Reports the current printer skew for each plane in both radians and degrees. The skew is calculated based on parameters provided via the `SET_SKEW` gcode.
 - `CALC_MEASURED_SKEW [AC=<ac_length>] [BD=<bd_length>]
-  [AD=<ad_length>]`: Calculates and reports the skew (in radians and
-  degrees) based on a measured print. This can be useful for
-  determining the printer's current skew after correction has been
-  applied. It may also be useful before correction is applied to
-  determine if skew correction is necessary. See skew_correction.md
-  for details on skew calibration objects and measurements.
-- `SKEW_PROFILE [LOAD=<name>] [SAVE=<name>] [REMOVE=<name>]`: Profile
-  management for skew_correction. LOAD will restore skew state from
-  the profile matching the supplied name. SAVE will save the current
-  skew state to a profile matching the supplied name. Remove will
-  delete the profile matching the supplied name from persistent
-  memory. Note that after SAVE or REMOVE operations have been run the
-  SAVE_CONFIG gcode must be run to make the changes to peristent
-  memory permanent.
+  [AD=<ad_length>]`: Calculates and reports the skew (in radians and degrees) based on a measured print. This can be useful for determining the printer's current skew after correction has been applied. 
+  It may also be useful before correction is applied to determine if skew correction is necessary. See skew_correction.md for details on skew calibration objects and measurements.
+- `SKEW_PROFILE [LOAD=<name>] [SAVE=<name>] [REMOVE=<name>]`: Profile management for skew_correction. LOAD will restore skew state from the profile matching the supplied name. 
+  SAVE will save the current skew state to a profile matching the supplied name. 
+  Remove will delete the profile matching the supplied name from persistent memory. 
+  Note that after SAVE or REMOVE operations have been run the SAVE_CONFIG gcode must be run to make the changes to peristent memory permanent.
 
 ### Delayed GCode
 
-The following command is enabled if a
-[delayed_gcode config section](Config_Reference.md#delayed_gcode) has
-been enabled (also see the
-[template guide](Command_Templates.md#delayed-gcodes)):
-- `UPDATE_DELAYED_GCODE [ID=<name>] [DURATION=<seconds>]`:  Updates the
-  delay duration for the identified [delayed_gcode] and starts the timer
-  for gcode execution.  A value of 0 will cancel a pending delayed gcode
-  from executing.
+The following command is enabled if a [delayed_gcode config section](Config_Reference.md#delayed_gcode) has been enabled (also see the [template guide](Command_Templates.md#delayed-gcodes)):
+- `UPDATE_DELAYED_GCODE [ID=<name>] [DURATION=<seconds>]`:  Updates the delay duration for the identified [delayed_gcode] and starts the timer for gcode execution.  A value of 0 will cancel a pending delayed gcode from executing.
 
 ### Save Variables
 
-The following command is enabled if a
-[save_variables config section](Config_Reference.md#save_variables)
-has been enabled:
-- `SAVE_VARIABLE VARIABLE=<name> VALUE=<value>`: Saves the variable to
-  disk so that it can be used across restarts. All stored variables
-  are loaded into the `printer.save_variables.variables` dict at
-  startup and can be used in gcode macros. The provided VALUE is
-  parsed as a Python literal.
+The following command is enabled if a [save_variables config section](Config_Reference.md#save_variables) has been enabled:
+- `SAVE_VARIABLE VARIABLE=<name> VALUE=<value>`: Saves the variable to disk so that it can be used across restarts. All stored variables are loaded into the `printer.save_variables.variables` dict at startup and can be used in gcode macros. The provided VALUE is parsed as a Python literal.
 
 ### Resonance compensation
 
-The following command is enabled if an
-[input_shaper config section](Config_Reference.md#input_shaper) has
-been enabled (also see the
-[resonance compensation guide](Resonance_Compensation.md)):
+The following command is enabled if an [input_shaper config section](Config_Reference.md#input_shaper) has been enabled (also see the [resonance compensation guide](Resonance_Compensation.md)):
 - `SET_INPUT_SHAPER [SHAPER_FREQ_X=<shaper_freq_x>]
   [SHAPER_FREQ_Y=<shaper_freq_y>]
   [DAMPING_RATIO_X=<damping_ratio_x>]
   [DAMPING_RATIO_Y=<damping_ratio_y>] [SHAPER_TYPE=<shaper>]
   [SHAPER_TYPE_X=<shaper_type_x>] [SHAPER_TYPE_Y=<shaper_type_y>]`:
-  Modify input shaper parameters. Note that SHAPER_TYPE parameter
-  resets input shaper for both X and Y axes even if different shaper
-  types have been configured in [input_shaper] section. SHAPER_TYPE
-  cannot be used together with either of SHAPER_TYPE_X and
-  SHAPER_TYPE_Y parameters. See
-  [config reference](Config_Reference.md#input_shaper) for more
-  details on each of these parameters.
+  Modify input shaper parameters. Note that SHAPER_TYPE parameter resets input shaper for both X and Y axes even if different shaper types have been configured in [input_shaper] section. SHAPER_TYPE cannot be used together with either of SHAPER_TYPE_X and SHAPER_TYPE_Y parameters. 
+  See [config reference](Config_Reference.md#input_shaper) for more details on each of these parameters.
 
 ### Temperature Fan Commands
 
-The following command is available when a
-[temperature_fan config section](Config_Reference.md#temperature_fan)
-is enabled:
+The following command is available when a [temperature_fan config section](Config_Reference.md#temperature_fan) is enabled:
 - `SET_TEMPERATURE_FAN_TARGET temperature_fan=<temperature_fan_name>
-  [target=<target_temperature>] [min_speed=<min_speed>]  [max_speed=<max_speed>]`: Sets the target temperature for a
-  temperature_fan. If a target is not supplied, it is set to the
-  specified temperature in the config file. If speeds are not supplied, no change is applied.
+  [target=<target_temperature>] [min_speed=<min_speed>]  [max_speed=<max_speed>]`: Sets the target temperature for a temperature_fan. If a target is not supplied, it is set to the specified temperature in the config file. If speeds are not supplied, no change is applied.
 
 ### Adxl345 Accelerometer Commands
 
-The following commands are available when an
-[adxl345 config section](Config_Reference.md#adxl345) is enabled:
+The following commands are available when an [adxl345 config section](Config_Reference.md#adxl345) is enabled:
 - `ACCELEROMETER_MEASURE [CHIP=<config_name>] [RATE=<value>]
-  [NAME=<value>]`: Starts accelerometer measurements at the requested
-  number of samples per second. If CHIP is not specified it defaults
-  to "default". Valid rates are 25, 50, 100, 200, 400, 800, 1600,
-  and 3200. The command works in a start-stop mode: when executed for
-  the first time, it starts the measurements, next execution stops
-  them. If RATE is not specified, then the default value is used
-  (either from `printer.cfg` or `3200` default value). The results of
-  measurements are written to a file named
-  `/tmp/adxl345-<chip>-<name>.csv` where `<chip>` is the name of the
-  accelerometer chip (`my_chip_name` from `[adxl345 my_chip_name]`) and
-  `<name>` is the optional NAME parameter. If NAME is not specified it
-  defaults to the current time in "YYYYMMDD_HHMMSS" format. If the
-  accelerometer does not have a name in its config section (simply
-  `[adxl345]`) <chip> part of the name is not generated.
-- `ACCELEROMETER_QUERY [CHIP=<config_name>] [RATE=<value>]`: queries
-  accelerometer for the current value. If CHIP is not specified it
-  defaults to "default". If RATE is not specified, the default value
-  is used. This command is useful to test the connection to the
-  ADXL345 accelerometer: one of the returned values should be a
-  free-fall acceleration (+/- some noise of the chip).
-- `ADXL345_DEBUG_READ [CHIP=<config_name>] REG=<register>`: queries
-  ADXL345 register <register> (e.g. 44 or 0x2C). Can be useful for
-  debugging purposes.
+  [NAME=<value>]`: Starts accelerometer measurements at the requested number of samples per second. If CHIP is not specified it defaults to "default". Valid rates are 25, 50, 100, 200, 400, 800, 1600, and 3200. 
+  The command works in a start-stop mode: when executed for the first time, it starts the measurements, next execution stops them. 
+  If RATE is not specified, then the default value is used (either from `printer.cfg` or `3200` default value). The results of measurements are written to a file named `/tmp/adxl345-<chip>-<name>.csv` where `<chip>` is the name of the accelerometer chip (`my_chip_name` from `[adxl345 my_chip_name]`) and `<name>` is the optional NAME parameter. 
+  If NAME is not specified it defaults to the current time in "YYYYMMDD_HHMMSS" format. 
+  If the accelerometer does not have a name in its config section (simply `[adxl345]`) <chip> part of the name is not generated.
+- `ACCELEROMETER_QUERY [CHIP=<config_name>] [RATE=<value>]`: queries accelerometer for the current value. If CHIP is not specified it defaults to "default". 
+  If RATE is not specified, the default value is used. 
+  This command is useful to test the connection to the ADXL345 accelerometer: one of the returned values should be a free-fall acceleration (+/- some noise of the chip).
+- `ADXL345_DEBUG_READ [CHIP=<config_name>] REG=<register>`: queries ADXL345 register <register> (e.g. 44 or 0x2C). Can be useful for debugging purposes.
 - `ADXL345_DEBUG_WRITE [CHIP=<config_name>] REG=<reg> VAL=<value>`:
-  writes raw <value> into a register <register>. Both <value> and
-  <register> can be a decimal or a hexadecimal integer. Use with care,
-  and refer to ADXL345 data sheet for the reference.
+  writes raw <value> into a register <register>. Both <value> and <register> can be a decimal or a hexadecimal integer. Use with care, and refer to ADXL345 data sheet for the reference.
 
-### Resonance Testing Commands
+### 공진 테스트 명령
 
-The following commands are available when a
-[resonance_tester config section](Config_Reference.md#resonance_tester)
-is enabled (also see the
-[measuring resonances guide](Measuring_Resonances.md)):
-- `MEASURE_AXES_NOISE`: Measures and outputs the noise for all axes of
-  all enabled accelerometer chips.
+[resonance_tester config section](Config_Reference.md#resonance_tester)이 
+활성화된 경우 다음 명령을 사용할 수 있습니다 
+([measuring resonances guide](Measuring_Resonances.md) 참조):
+- `MEASURE_AXES_NOISE`: 활성화된 모든 가속도계 칩의 모든 축에 대한 
+  노이즈를 측정하고 출력합니다.
 - `TEST_RESONANCES AXIS=<axis> OUTPUT=<resonances,raw_data>
   [NAME=<name>] [FREQ_START=<min_freq>] [FREQ_END=<max_freq>]
-  [HZ_PER_SEC=<hz_per_sec>] [INPUT_SHAPING=[<0:1>]]`: Runs the resonance
-  test in all configured probe points for the requested <axis>
-  and measures the acceleration using the accelerometer chips configured
-  for the respective axis. <axis> can either be X or Y, or specify an
-  arbitrary direction as `AXIS=dx,dy`, where dx and dy are floating point
-  numbers defining a direction vector (e.g. `AXIS=X`, `AXIS=Y`, or
-  `AXIS=1,-1` to define a diagonal direction). Note that `AXIS=dx,dy` and
-  `AXIS=-dx,-dy` is equivalent. If `INPUT_SHAPING=0` or not set (default),
-  disables input shaping for the resonance testing, because it is not valid
-  to run the resonance testing with the input shaper enabled.
-  `OUTPUT` parameter is a comma-separated list of which outputs will be
-  written. If `raw_data` is requested, then the raw accelerometer data
-  is written into a file or a series of files
-  `/tmp/raw_data_<axis>_[<point>_]<name>.csv` with (`<point>_` part of
-  the name generated only if more than 1 probe point is configured).
-  If `resonances` is specified, the frequency response is calculated
-  (across all probe points) and written into
-  `/tmp/resonances_<axis>_<name>.csv` file. If unset, OUTPUT defaults
-  to `resonances`, and NAME defaults to the current time in
-  "YYYYMMDD_HHMMSS" format.
+  [HZ_PER_SEC=<hz_per_sec>] [INPUT_SHAPING=[<0:1>]]`: 요청한 <축>에 대해 구성된 
+  모든 프로브 포인트에서 공진 테스트를 실행하고 각 축에 대해 구성된 가속도계 칩을 사용하여 
+  가속도를 측정합니다. <축> 은 X 또는 Y가 될 수 있거나 임의의 방향을 `AXIS=dx,dy`로 
+  지정할 수 있습니다. 여기서 dx 및 dy는 방향 벡터를 정의하는 부동 소수점 숫자입니다.
+  (예: `AXIS=X`, `AXIS=Y`, 또는 대각선 방향을 정의하는 `AXIS=1,-1`).
+  `AXIS=dx,dy`와 `AXIS=-dx,-dy`는 동일합니다. 'INPUT_SHAPING=0'이거나 설정되지 
+  않은 경우(기본값), 입력 셰이퍼가 활성화된 상태에서 공진 테스트를 실행하는 것이 유효하지 
+  않기 때문에 공진 테스트에 대한 입력 셰이핑을 비활성화합니다.
+  'OUTPUT' 매개변수는 출력이 기록될 쉼표로 구분된 목록입니다.
+  `raw_data`가 요청된 경우, 원시 가속도계 데이터가 파일 또는 일련의 파일 
+  `/tmp/raw_data_<axis>_[<point>_]<name>.csv` 에 기록됩니다. (
+  둘 이상의 프로브 포인트가 구성된 경우에만 생성되는 이름의 `<point>_` 부분).
+  'resonances'가 지정된 경우, 주파수 응답이 계산되고(모든 프로브 포인트에서) 
+  `/tmp/resonances_<axis>_<name>.csv` 파일에 기록됩니다. 설정하지 않으면 
+  OUTPUT은 기본적으로 'resonances'로 설정되고 NAME은 "YYYYMMDD_HHMMSS" 
+  형식의 현재 시간으로 기본 설정됩니다.
 - `SHAPER_CALIBRATE [AXIS=<axis>] [NAME=<name>]
   [FREQ_START=<min_freq>] [FREQ_END=<max_freq>]
   [HZ_PER_SEC=<hz_per_sec>] [MAX_SMOOTHING=<max_smoothing>]`:
-  Similarly to `TEST_RESONANCES`, runs the resonance test as configured,
-  and tries to find the optimal parameters for the input shaper for the
-  requested axis (or both X and Y axes if `AXIS` parameter is unset).
-  If `MAX_SMOOTHING` is unset, its value is taken from `[resonance_tester]`
-  section, with the default being unset. See the
-  [Max smoothing](Measuring_Resonances.md#max-smoothing) of the measuring
-  resonances guide for more information on the use of this feature.
-  The results of the tuning are printed to the console, and the frequency
-  responses and the different input shapers values are written to a CSV
-  file(s) `/tmp/calibration_data_<axis>_<name>.csv`. Unless specified, NAME
-  defaults to the current time in "YYYYMMDD_HHMMSS" format. Note that
-  the suggested input shaper parameters can be persisted in the config
-  by issuing `SAVE_CONFIG` command.
+  `TEST_RESONANCES`와 유사하게 구성된 대로 공진 테스트를 실행하고 요청된 
+  축(또는 `AXIS` 매개변수가 설정되지 않은 경우 X축과 Y축 모두)에 대한 입력 
+  셰이퍼에 대한 최적의 매개변수를 찾으려고 시도합니다.
+  `MAX_SMOOTHING`이 설정되지 않은 경우 해당 값은 `[resonance_tester]` 
+  섹션에서 가져오고 기본값은 설정되지 않습니다. 이 기능의 사용에 대한 자세한 내용은 
+  공진 측정 가이드의 [Max smoothing](Measuring_Resonances.md#max-smoothing)를 
+  참조하세요. 조정 결과는 콘솔에 인쇄되고 주파수 응답과 다양한 입력 셰이퍼 값은 CSV 파일 
+  `/tmp/calibration_data_<axis>_<name>.csv`에 기록됩니다. 지정하지 않는 한 
+  NAME의 기본값은 "YYYYMMDD_HHMMSS" 형식의 현재 시간입니다.
+  제안된 입력 셰이퍼 매개변수는 'SAVE_CONFIG' 명령을 실행하여 구성에 유지될 수 있습니다.
 
-### Palette 2 Commands
+### 팔레트 2 명령
 
-The following command is available when the
-[palette2 config section](Config_Reference.md#palette2)
-is enabled:
-- `PALETTE_CONNECT`: This command initializes the connection with
-  the Palette 2.
-- `PALETTE_DISCONNECT`: This command disconnects from the Palette 2.
-- `PALETTE_CLEAR`: This command instructs the Palette 2 to clear all of the
-  input and output paths of filament.
-- `PALETTE_CUT`: This command instructs the Palette 2 to cut the filament
-  currently loaded in the splice core.
-- `PALETTE_SMART_LOAD`: This command start the smart load sequence on the
-  Palette 2. Filament is loaded automatically by extruding it the distance
-  calibrated on the device for the printer, and instructs the Palette 2
-  once the loading has been completed. This command is the same as pressing
-  **Smart Load** directly on the Palette 2 screen after the filament load
-  is complete.
+다음 명령은 [palette2 config section](Config_Reference.md#palette2)이 
+활성화된 경우 사용할 수 있습니다:
+- `PALETTE_CONNECT`: 이 명령은 팔레트 2와의 연결을 초기화합니다. 
+- `PALETTE_DISCONNECT`: 이 명령은 팔레트 2에서 연결을 끊습니다. 
+- `PALETTE_CLEAR`: 이 명령은 필라멘트의 모든 입력 및 출력 경로를 지우도록 팔레트 
+  2에 지시합니다.
+- `PALETTE_CUT`: 이 명령은 현재 스플라이스 코어에 로드된 필라멘트를 절단하도록 
+  팔레트 2에 지시합니다.
+- `PALETTE_SMART_LOAD`: 이 명령은 팔레트 2에서 스마트 로드 시퀀스를 시작합니다.
+  Filament는 프린터용 장치에서 보정된 거리만큼 밀어내어 자동으로 Load되며, 
+  Load가 완료되면 Palette 2에 지시합니다. 이 명령은 누르는 것과 동일합니다. 
+  이 명령은 필라멘트 로드가 완료된 후 Palette 2 화면에서 직접 **Smart Load**를 
+  누르는 것과 같습니다.
 
-Palette prints work by embedding special OCodes (Omega Codes)
-in the GCode file:
-- `O1`...`O32`: These codes are read from the GCode stream and processed
-  by this module and passed to the Palette 2 device.
+특수 OCode(Omega Codes)를 포함하여 팔레트 인쇄 작업
+GCode 파일에서:
+- `O1`...`O32`: 이 코드는 GCode 스트림에서 읽고 이 모듈에 의해 처리되고 
+  팔레트 2 장치로 전달됩니다.
