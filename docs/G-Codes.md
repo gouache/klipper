@@ -140,7 +140,7 @@ Klipper는 일반 구성 및 상태에 대해 "확장된" G-Code 명령을 사�
 - `ACTIVATE_EXTRUDER EXTRUDER=<config_name>`: 여러 압출기가 있는 프린터에서 
   이 명령은 활성 압출기를 변경하는 데 사용됩니다.
 - `SET_PRESSURE_ADVANCE [EXTRUDER=<config_name>] [ADVANCE=<pressure_advance>]
-  [SMOOTH_TIME=<pressure_advance_smooth_time>]`: 압력 보정 매개변수를 설정합니다.
+  [SMOOTH_TIME=<pressure_advance_smooth_time>]`: pressure advance 매개변수를 설정합니다.
   EXTRUDER를 지정하지 않으면 기본적으로 현재 사용중인 익스트루더가 설정됩니다.
 - `SET_EXTRUDER_STEP_DISTANCE [EXTRUDER=<config_name>]
   [DISTANCE=<distance>]`: 제공된 익스트루더의  "step distance "에 대한 새 값을 설정합니다. 
