@@ -45,109 +45,151 @@ Klipper 의 목표는 표준 구성에서 일반적인 타사 소프트웨어
 
 ### G-Code SD 카드 명령
 
-Klipper also supports the following standard G-Code commands if the [virtual_sdcard config section](Config_Reference.md#virtual_sdcard) is enabled:
-- List SD card: `M20`
-- Initialize SD card: `M21`
-- Select SD file: `M23 <filename>`
-- Start/resume SD print: `M24`
-- Pause SD print: `M25`
-- Set SD position: `M26 S<offset>`
-- Report SD print status: `M27`
+Klipper는 [virtual_sdcard config section](Config_Reference.md#virtual_sdcard) 이 
+활성화된 경우 다음 표준 G-Code 명령도 지원합니다:
+- SD 카드 목록 보기: `M20`
+- SD 카드 초기화: `M21`
+- SD 파일 선택: `M23 <filename>`
+- SD 프린트 시작/재시작: `M24`
+- SD 프린트 잠시멈춤: `M25`
+- SD 위치 설정: `M26 S<offset>`
+- SD 프린트 상태 리포트: `M27`
 
-In addition, the following extended commands are availble when the "virtual_sdcard" config section is enabled.
-- Load a file and start SD print: `SDCARD_PRINT_FILE FILENAME=<filename>`
-- Unload file and clear SD state: `SDCARD_RESET_FILE`
+또한 "virtual_sdcard" 구성 섹션이 활성화된 경우 다음 확장 명령을 사용할 수 있습니다.
+- SD 파일 로드 및 프린트: `SDCARD_PRINT_FILE FILENAME=<filename>`
+- 파일 언로드 및 SD 상태 지우기: `SDCARD_RESET_FILE`
 
 ### arcs
 
-The following standard G-Code commands are available if a [gcode_arcs config section](Config_Reference.md#gcode_arcs) is enabled:
+[gcode_arcs config section](Config_Reference.md#gcode_arcs)이 활성화된 경우 
+다음 표준 G-Code 명령을 사용할 수 있습니다.
 - Controlled Arc Move (G2 or G3): `G2 [X<pos>] [Y<pos>] [Z<pos>]
   [E<pos>] [F<speed>] I<value> J<value>`
 
 ### 펌웨어 리트랙션
 
-The following standard G-Code commands are available if a [firmware_retraction config section](Config_Reference.md#firmware_retraction) is enabled:
+[firmware_retraction config section](Config_Reference.md#firmware_retraction) 이 
+활성화된 경우 다음 표준 G-Code 명령을 사용할 수 있습니다.
 - Retract: `G10`
 - Unretract: `G11`
 
 ### 디스플레이 명령
 
-The following standard G-Code commands are available if a [display config section](Config_Reference.md#display) is enabled:
+[display config section](Config_Reference.md#display)이 활성화된 경우 다음 표준 
+G-코드 명령을 사용할 수 있습니다.
 - Display Message: `M117 <message>`
 - Set build percentage: `M73 P<percent>`
 
 ### 기타 사용 가능한 G 코드 명령
 
-The following standard G-Code commands are currently available, but using them is not recommended:
-- Get Endstop Status: `M119` (Use QUERY_ENDSTOPS instead.)
+다음 표준 G-Code 명령을 현재 사용할 수 있지만 사용하지 않는 것이 좋습니다.
+- Get Endstop Status: `M119` (대신 QUERY_ENDSTOPS 사용하세요)
 
 ## 확장된 G 코드 명령
 
-Klipper uses "extended" G-Code commands for general configuration and status.  These extended commands all follow a similar format - they start with a command name and may be followed by one or more parameters. 
+Klipper는 일반 구성 및 상태에 대해 "확장된" G-Code 명령을 사용합니다. 이러한 확장 
+명령은 모두 유사한 형식을 따릅니다. 명령 이름으로 시작하고 하나 이상의 매개변수가 뒤따를 수 있습니다.
+예제: `SET_SERVO SERVO=myservo ANGLE=5.3`. 
+이 문서에서 명령과 매개변수는 대문자로 표시되지만 대소문자를 구분하지 않습니다. 
+(따라서 "SET_SERVO"와 "set_servo"는 모두 동일한 명령을 실행합니다.)
 
-For example: `SET_SERVO SERVO=myservo ANGLE=5.3`. In this document, the commands and parameters are shown in uppercase, however they are not case sensitive. 
-
-(So, "SET_SERVO" and "set_servo" both run the same command.)
-
-
-The following standard commands are supported:
-- `QUERY_ENDSTOPS`: Probe the axis endstops and report if they are "triggered" or in an "open" state. This command is typically used to verify that an endstop is working correctly.
-- `QUERY_ADC [NAME=<config_name>] [PULLUP=<value>]`: Report the last analog value received for a configured analog pin. If NAME is not provided, the list of available adc names are reported. If PULLUP is provided (as a value in Ohms), the raw analog value along with the equivalent resistance given that pullup is reported.
-- `GET_POSITION`: Return information on the current location of the toolhead.
-- `SET_GCODE_OFFSET [X=<pos>|X_ADJUST=<adjust>] [Y=<pos>|Y_ADJUST=<adjust>] [Z=<pos>|Z_ADJUST=<adjust>] [MOVE=1 [MOVE_SPEED=<speed>]]`: Set a positional offset to apply to future G-Code commands.
-  This is commonly used to virtually change the Z bed offset or to set nozzle XY offsets when switching extruders. 
-  For example, if "SET_GCODE_OFFSET Z=0.2" is sent, then future G-Code moves will have 0.2mm added to their Z height. 
-  If the X_ADJUST style parameters are used, then the adjustment will be added to any existing offset (eg, "SET_GCODE_OFFSET Z=-0.2" followed by "SET_GCODE_OFFSET Z_ADJUST=0.3" would result in a total Z offset of 0.1). 
-  If "MOVE=1" is specified then a toolhead move will be issued to apply the given offset (otherwise the offset will take effect on the next absolute G-Code move that specifies the given axis). 
-  If "MOVE_SPEED" is specified then the toolhead move will be performed with the given speed (in mm/s); otherwise the toolhead move will use the last specified G-Code speed.
-- `SAVE_GCODE_STATE [NAME=<state_name>]`: Save the current g-code coordinate parsing state. Saving and restoring the g-code state is useful in scripts and macros. This command saves the current g-code absolute coordinate mode (G90/G91), absolute extrude mode (M82/M83), origin (G92), offset (SET_GCODE_OFFSET), speed override (M220), extruder override (M221), move speed, current XYZ position, and relative extruder "E" position. 
-  If NAME is provided it allows one to name the saved state to the given string. If NAME is not provided it defaults to "default".
+다음 표준 명령이 지원됩니다:
+- `QUERY_ENDSTOPS`: 엔드스톱을 조사하고 "triggered" 되었는지 또는 "open" 상태인지 보고합니다.
+  이 명령은 일반적으로 엔드스톱이 올바르게 작동하는지 확인하는 데 사용됩니다.
+- `QUERY_ADC [NAME=<config_name>] [PULLUP=<value>]`: 구성된 아날로그 핀에 대해 수신된 
+  마지막 아날로그 값을 보고합니다. NAME 이 제공되지 않으면 사용 가능한 adc 이름 목록이 보고됩니다. 
+  PULLUP 이 제공되면 (Ohms 단위의 값으로) 해당 풀업이 제공된 등가 저항과 함께 원시 아날로그 값이 
+  보고됩니다.
+- `GET_POSITION`: 툴헤드의 현재 위치에 대한 정보를 반환합니다.
+- `SET_GCODE_OFFSET [X=<pos>|X_ADJUST=<adjust>] 
+  [Y=<pos>|Y_ADJUST=<adjust>] [Z=<pos>|Z_ADJUST=<adjust>] 
+  [MOVE=1 [MOVE_SPEED=<speed>]]`: 향후 G-Code 명령에 적용할 위치 오프셋을 설정합니다.
+  것은 일반적으로 Z 베드 오프셋을 가상으로 변경하거나 압출기를 전환할 때 노즐 XY 오프셋을 
+  설정하는 데 사용됩니다. 예를 들어 "SET_GCODE_OFFSET Z=0.2"가 전송되면 향후 G-Code 
+  이동은 Z 높이에 0.2mm가 추가됩니다.X_ADJUST 스타일 매개변수를 사용하는 경우 조정이 기존 
+  오프셋에 추가됩니다. (예: "SET_GCODE_OFFSET Z = -0.2" 다음에 
+  "SET_GCODE_OFFSET Z_ADJUST = 0.3"을 입력하면 총 Z 오프셋이 0.1이 됩니다.) 
+  "MOVE=1"이 지정되면 지정된 오프셋을 적용하기 위해 툴 헤드 이동이 실행됩니다. 
+  (그렇지 않으면 오프셋은 주어진 축을 지정하는 다음 절대 G 코드 이동에 적용됩니다.)
+  "MOVE_SPEED"가 지정되면 지정된 속도(mm/s)로 툴 헤드 이동이 수행됩니다; 그렇지 않으면 
+  툴 헤드 이동은 마지막으로 지정된 G 코드 속도를 사용합니다.
+- `SAVE_GCODE_STATE [NAME=<state_name>]`: 현재 g-code 좌표 구문 분석 상태를 저장합니다. 
+  g-code 상태를 저장하고 복원하는 것은 스크립트와 매크로에서 유용합니다. 
+  이 명령은 현재 g-code 절대 좌표 모드(G90/G91), 절대 압출 모드(M82/M83), 원점(G92), 
+  오프셋(SET_GCODE_OFFSET), 속도 오버라이드(M220), 압출기 오버라이드(M221), 현재 XYZ 위치 
+  및 상대 압출기 "E" 위치 그리고 이동 속도를 저장합니다,   
+  NAME 이 제공되면 저장된 상태의 이름을 주어진 문자열로 지정할 수 있습니다.
+  NAME 이 제공되지 않으면 기본값은 "default" 입니다.
 - `RESTORE_GCODE_STATE [NAME=<state_name>]
-  [MOVE=1 [MOVE_SPEED=<speed>]]`: Restore a state previously saved via SAVE_GCODE_STATE. 
-  If "MOVE=1" is specified then a toolhead move will be issued to move back to the previous XYZ position. If "MOVE_SPEED" is specified then the toolhead move will be performed with the given speed (in mm/s); otherwise the toolhead move will use the restored g-code speed.
+  [MOVE=1 [MOVE_SPEED=<speed>]]`: SAVE_GCODE_STATE 를 통해 이전에 저장한 상태를 복원합니다.
+  "MOVE=1"이 지정되면 이전 XYZ 위치로 다시 이동하기 위해 툴 헤드 이동이 실행됩니다.
+  "MOVE_SPEED"가 지정되면 지정된 속도(mm/s)로 툴 헤드 이동이 수행됩니다;
+  그렇지 않으면 툴헤드 이동은 복원된 g-코드 속도를 사용합니다.
 - `PID_CALIBRATE HEATER=<config_name> TARGET=<temperature>
-  [WRITE_FILE=1]`: Perform a PID calibration test. The specified heater will be enabled until the specified target temperature is reached, and then the heater will be turned off and on for several cycles. 
-  If the WRITE_FILE parameter is enabled, then the file /tmp/heattest.txt will be created with a log of all temperature samples taken during the test.
-- `TURN_OFF_HEATERS`: Turn off all heaters.
+  [WRITE_FILE=1]`: PID 캘리브레이션 테스트를 수행합니다.
+  지정된 히터는 지정된 목표 온도에 도달할 때까지 활성화되며, 그런 다음 히터가 여러 사이클 동안
+  꺼졌다 켜집니다. WRITE_FILE 매개변수가 활성화된 경우, /tmp/heattest.txt 파일이 테스트 중에 
+  가져온 모든 온도 샘플의 로그와 함께 생성됩니다.
+- `TURN_OFF_HEATERS`: 모든 히터를 끕니다.
 - `TEMPERATURE_WAIT SENSOR=<config_name> [MINIMUM=<target>] [MAXIMUM=<target>]`:
-  Wait until the given temperature sensor is at or above the supplied MINIMUM and/or at or below the supplied MAXIMUM.
+  주어진 온도 센서가 제공된 최소값 이상 및/또는 제공된 최대값 이하일 때까지 기다립니다.
 - `SET_VELOCITY_LIMIT [VELOCITY=<value>] [ACCEL=<value>]
-  [ACCEL_TO_DECEL=<value>] [SQUARE_CORNER_VELOCITY=<value>]`: Modify the printer's velocity limits.
+  [ACCEL_TO_DECEL=<value>] [SQUARE_CORNER_VELOCITY=<value>]`: 프린터의 속도 제한을 수정합니다.
 - `SET_HEATER_TEMPERATURE HEATER=<heater_name> [TARGET=<target_temperature>]`:
-  Sets the target temperature for a heater. If a target temperature is not supplied, the target is 0.
-- `ACTIVATE_EXTRUDER EXTRUDER=<config_name>`: In a printer with multiple extruders this command is used to change the active extruder.
+  히터의 목표 온도를 설정합니다. 목표 온도가 제공되지 않으면 목표는 0입니다.
+- `ACTIVATE_EXTRUDER EXTRUDER=<config_name>`: 여러 압출기가 있는 프린터에서 
+  이 명령은 활성 압출기를 변경하는 데 사용됩니다.
 - `SET_PRESSURE_ADVANCE [EXTRUDER=<config_name>] [ADVANCE=<pressure_advance>]
-  [SMOOTH_TIME=<pressure_advance_smooth_time>]`: Set pressure advance parameters. If EXTRUDER is not specified, it defaults to the active extruder.
+  [SMOOTH_TIME=<pressure_advance_smooth_time>]`: 압력 보정 매개변수를 설정합니다.
+  EXTRUDER를 지정하지 않으면 기본적으로 현재 사용중인 익스트루더가 설정됩니다.
 - `SET_EXTRUDER_STEP_DISTANCE [EXTRUDER=<config_name>]
-  [DISTANCE=<distance>]`: Set a new value for the provided extruder's "step distance". The "step distance" is `rotation_distance/(full_steps_per_rotation*microsteps)`. 
-  Value is not retained on Klipper reset. Use with caution, small changes can result in excessive pressure between extruder and hot end. 
-  Do proper calibration steps with filament before use. 
-  If 'DISTANCE' value is not included command will return current step distance.
-- `SET_STEPPER_ENABLE STEPPER=<config_name> ENABLE=[0|1]`: Enable or disable only the given stepper. 
-  This is a diagnostic and debugging tool and must be used with care. Disabling an axis motor does not reset the homing information. Manually moving a disabled stepper may cause the machine to operate the motor outside of safe limits. 
-  This can lead to damage to axis components, hot ends, and print surface.
-- `STEPPER_BUZZ STEPPER=<config_name>`: Move the given stepper forward one mm and then backward one mm, repeated 10 times. 
-  This is a diagnostic tool to help verify stepper connectivity.
-- `MANUAL_PROBE [SPEED=<speed>]`: Run a helper script useful for measuring the height of the nozzle at a given location. If SPEED is specified, it sets the speed of TESTZ commands (the default is 5mm/s). 
-  During a manual probe, the following additional commands are available:
-  - `ACCEPT`: This command accepts the current Z position and concludes the manual probing tool.
-  - `ABORT`: This command terminates the manual probing tool.
-  - `TESTZ Z=<value>`: This command moves the nozzle up or down by the amount specified in "value". For example, `TESTZ Z=-.1` would move the nozzle down .1mm while `TESTZ Z=.1` would move the nozzle up .1mm. The value may also be `+`, `-`, `++`, or `--` to move the nozzle up or down an amount relative to previous attempts.
-- `Z_ENDSTOP_CALIBRATE [SPEED=<speed>]`: Run a helper script useful for calibrating a Z position_endstop config setting. 
-  See the MANUAL_PROBE command for details on the parameters and the additional commands available while the tool is active.
-- `Z_OFFSET_APPLY_ENDSTOP`: Take the current Z Gcode offset (aka, babystepping), and subtract it from the stepper_z endstop_position.
-  This acts to take a frequently used babystepping value, and "make it permanent".  Requires a `SAVE_CONFIG` to take effect.
-- `TUNING_TOWER COMMAND=<command> PARAMETER=<name> START=<value> FACTOR=<value> [BAND=<value>]`: A tool for tuning a parameter on each Z height during a print.
-  The tool will run the given COMMAND with the given PARAMETER assigned to the value using the formula `value = start + factor * z_height`. 
-  If BAND is provided then the adjustment will only be made every BAND millimeters of z height - in that case the formula used is `value = start + factor * ((floor(z_height / band) + .5) * band)`.
-- `SET_DISPLAY_GROUP [DISPLAY=<display>] GROUP=<group>`: Set the active display group of an lcd display. This allows to define multiple display data groups in the config, e.g. `[display_data <group> <elementname>]` and switch between them using this extended gcode command. 
-  If DISPLAY is not specified it defaults to "display" (the primary display).
-- `SET_IDLE_TIMEOUT [TIMEOUT=<timeout>]`:  Allows the user to set the idle timeout (in seconds).
-- `RESTART`: This will cause the host software to reload its config and perform an internal reset. This command will not clear error state from the micro-controller (see FIRMWARE_RESTART) nor will it load new software (see [the FAQ](FAQ.md#how-do-i-upgrade-to-the-latest-software)).
-- `FIRMWARE_RESTART`: This is similar to a RESTART command, but it also clears any error state from the micro-controller.
-- `SAVE_CONFIG`: This command will overwrite the main printer config file and restart the host software. This command is used in conjunction with other calibration commands to store the results of calibration tests.
-- `STATUS`: Report the Klipper host software status.
-- `HELP`: Report the list of available extended G-Code commands.
+  [DISTANCE=<distance>]`: 제공된 익스트루더의  "step distance "에 대한 새 값을 설정합니다. 
+  "step distance" 는 `rotation_distance/(full_steps_per_rotation*microsteps)` 입니다.
+  Klipper 재설정 시 값이 유지되지 않습니다. 주의해서 사용하십시오. 
+  작은 변화로도 압출기와 핫 엔드 사이에 과도한 압력이 발생할 수 있습니다. 
+  사용하기 전에 필라멘트로 적절한 보정 단계를 수행하십시오. 
+  'DISTANCE' 값이 포함되지 않은 경우 명령은 현재 단계 DISTANCE 를 반환합니다.
+- `SET_STEPPER_ENABLE STEPPER=<config_name> ENABLE=[0|1]`: 지정된 스테퍼만 활성화 
+  또는 비활성화합니다. 이것은 진단 및 디버깅 도구이며 주의해서 사용해야 합니다. 축 모터를 비활성화해도 
+  원점 복귀 정보는 재설정되지 않습니다. 비활성화된 스테퍼를 수동으로 이동하면 기계가 안전 한계를 벗어나 
+  모터를 작동할 수 있습니다. 이로 인해 축 구성 요소, 핫 엔드 및 인쇄 표면이 손상될 수 있습니다.
+- `STEPPER_BUZZ STEPPER=<config_name>`: 주어진 스테퍼를 앞으로 1mm 이동한 다음 뒤로 1mm 
+  이동하고 10회 반복합니다. 이것은 스테퍼 연결을 확인하는 데 도움이 되는 진단 도구입니다.
+- `MANUAL_PROBE [SPEED=<speed>]`: 주어진 위치에서 노즐 높이를 측정하는 데 유용한 도우미 
+  스크립트를 실행합니다. SPEED가 지정되면 TESTZ 명령의 속도를 설정합니다(기본값은 5mm/s).
+  수동 프로브 중에 다음과 같은 추가 명령을 사용할 수 있습니다:
+  - `ACCEPT`: 이 명령은 현재 Z 위치를 받아들이고 수동 프로빙을 종료합니다.
+  - `ABORT`: 이 명령은 수동 프로빙을 종료합니다.
+  - `TESTZ Z=<value>`: 이 명령은 "value" 에 지정된 양만큼 노즐을 위 또는 아래로 이동합니다. 
+    예를 들어 `TESTZ Z=-.1`은 노즐을 0.1mm 아래로 이동하고 `TESTZ Z=.1`은 노즐을 0.1mm 
+    위로 이동합니다. 값은 또한 '+', '-', '++' 또는 '--'로 노즐을 이전 시도에 비해 위 또는 
+    아래로 움직일 수 있습니다.
+- `Z_ENDSTOP_CALIBRATE [SPEED=<speed>]`: Z position_endstop 구성 설정을 보정하는 데
+   유용한 도우미 스크립트를 실행합니다. 툴이 활성화되어 있는 동안 사용할 수 있는 매개변수 및 추가 
+   명령에 대한 자세한 내용은 MANUAL_PROBE 명령을 참조하십시오.
+- `Z_OFFSET_APPLY_ENDSTOP`: 현재 Z Gcode 오프셋(일명 babystepping)을 가져 와서 
+  stepper_z endstop_position에서 뺍니다.이것은 자주 사용하는 베이비 스테핑 값을 가져 와서 
+  "영구화"하는 역할을 합니다. 적용하려면 'SAVE_CONFIG'가 필요합니다.
+- `TUNING_TOWER COMMAND=<command> PARAMETER=<name> 
+  START=<value> FACTOR=<value> [BAND=<value>]`: 인쇄하는 동안 각 Z 높이에서 매개변수를 
+  조정하기 위한 도구입니다. 이것은 `value = start + factor * z_height` 공식을 사용하여 값에 
+  지정된 PARAMETER로 지정된 COMMAND를 실행합니다. BAND가 제공되면 z 높이의 BAND 밀리미터마다 
+  조정이 이루어집니다. 이 경우 사용되는 공식은 
+  `value = start + factor * ((floor(z_height / band) + .5) * band)`입니다.
+- `SET_DISPLAY_GROUP [DISPLAY=<display>] GROUP=<group>`: LCD 디스플레이의 활성 
+  디스플레이 그룹을 설정합니다. 이를 통해 구성에서 여러 디스플레이 데이터 그룹을 정의할 수 있습니다, 
+  예를 들어 `[display_data <group> <elementname>]`을 선택하고 이 확장된 gcode 명령을 
+  사용하여 둘 사이를 전환합니다. DISPLAY가 지정되지 않은 경우 기본값은 "display" 
+  (기본 디스플레이)입니다.
+- `SET_IDLE_TIMEOUT [TIMEOUT=<timeout>]`:  사용자가 유휴 시간 초과(초)를 설정할 수 있습니다.
+- `RESTART`: 호스트 소프트웨어가 구성을 다시 로드하고 내부 재설정을 수행합니다. 
+  이 명령은 마이크로 컨트롤러에서 오류 상태를 지우지 않습니다. (FIRMWARE_RESTART 참조) 
+  새 소프트웨어를 로드하지도 않습니다([FAQ](FAQ.md#how-do-i-upgrade-to-the-latest-software 참조)).
+- `FIRMWARE_RESTART`: 이는 RESTART 명령과 유사하지만 마이크로 컨트롤러의 모든 오류 상태도 지웁니다
+- `SAVE_CONFIG`: 이 명령은 기본 프린터 config 파일을 덮어쓰고 호스트 소프트웨어를 다시 시작합니다. 
+  이 명령은 캘리브레이션 테스트 결과를 저장하기 위해 다른 캘리브레이션 명령과 함께 사용됩니다.
+- `STATUS`: Klipper 호스트 소프트웨어 상태를 보고합니다.
+- `HELP`: 사용 가능한 확장 G 코드 명령 목록을 보고합니다.
 
 ### 매크로 명령
 
