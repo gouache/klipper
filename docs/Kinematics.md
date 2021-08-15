@@ -190,7 +190,7 @@ Klipper는 자체 운동학 클래스에서 익스트루더 동작을 구현합�
 stepper_position = requested_e_position
 ```
 
-### 압력 조절 (Pressure advance)
+### Pressure advance
 
 실험을 통해 기본 익스트루더 공식 이상으로 익스트루더의 모델링을 개선할 수 있음이 나타났습니다. 
 이상적인 경우 익스트루더 이동이 진행됨에 따라 각 지점에 동일한 부피의 필라멘트가 쌓여야 
@@ -200,7 +200,7 @@ stepper_position = requested_e_position
 
 ![ooze](img/ooze.svg.png)
 
-"압력 조절" 시스템은 익스트루더에 대해 다른 모델을 사용하여 이를 설명하려고 시도합니다. 
+"pressure advance" 시스템은 익스트루더에 대해 다른 모델을 사용하여 이를 설명하려고 시도합니다. 
 익스트루더로 공급되는 필라멘트의 각 mm^3가 익스트루더에서 즉시 나오는 mm^3의 양을 
 초래할 것이라고 순진하게 믿는 대신 압력을 기반으로 한 모델을 사용합니다. 필라멘트가 
 익스트루더로 밀릴 때 압력이 증가하고 
@@ -214,15 +214,15 @@ pa_position = nominal_position + pressure_advance_coefficient * nominal_velocity
 ```
 
 이 압력 조절 계수를 찾는 방법에 대한 정보는 
-[압력 조절](Pressure_Advance.md) 문서를 참조하십시오.
+[pressure advance](Pressure_Advance.md) 문서를 참조하십시오.
 
 기본 압력 조절 공식으로 인해 익스트루더 모터가 급격한 속도 변화를 일으킬 수 있습니다. 
 Klipper는 이를 피하기 위해 익스트루더 움직임의 "smoothing"를 구현합니다.
 
-![압력-조절](img/pressure-velocity.png)
+![pressure-advance](img/pressure-velocity.png)
 
 위의 그래프는 0이 아닌 코너링 속도가 있는 두 개의 돌출 움직임의 예를 보여줍니다. 
-압력 조절 시스템은 가속 중에 추가 필라멘트를 압출기로 밀어 넣습니다. 
+pressure advance 시스템은 가속 중에 추가 필라멘트를 압출기로 밀어 넣습니다. 
 원하는 필라멘트 유속이 높을수록 압력에 대응하기 위해 가속 중에 더 많은 필라멘트를 
 밀어 넣어야 합니다. 헤드 감속 중에 추가 필라멘트가 리트렉션 됩니다. 
 (익스트루더는 음의 속도를 가짐).
@@ -233,7 +233,7 @@ Klipper는 이를 피하기 위해 익스트루더 움직임의 "smoothing"를 �
 이동의 시작 이전에 어떻게 움직이기 시작하고 마지막 압출 이동의 종료 후에도 계속 
 움직이는지 확인하십시오.
 
-"smoothed 압력 조절"의 핵심 공식:
+"smoothed pressure advance"의 핵심 공식:
 ```
 smooth_pa_position(t) =
     ( definitive_integral(pa_position(x) * (smooth_time/2 - abs(t - x)) * dx,
