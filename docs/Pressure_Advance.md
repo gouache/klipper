@@ -4,7 +4,7 @@
 조정에 대한 정보를 제공합니다. pressure advance 기능은 ooze (노즐 흘러내림) 를
 줄이는 데 도움이 될 수 있습니다.
 
-압력 어드밴스가 구현되는 방법에 대한 자세한 내용은 
+pressure advance 가 구현되는 방법에 대한 자세한 내용은 
 [kinematics](Kinematics.md) 문서를 참조하십시오.
 
 ## pressure advance 튜닝
@@ -61,7 +61,7 @@ pressure_advance 값은 `pressure_advance = <start> + <measured_height> * <facto
 최대 1.000 까지의 pressure advance 으로 유의미한 개선이 없으면 pressure advance 로 
 인해 인쇄 품질이 향상되지 않을 것입니다. 그러면 pressure advance 비활성화된 기본 구성으로 돌아갑니다.
 
-이 튜닝 연습은 모서리의 품질을 직접적으로 향상시키지만 좋은 압력 pressure advance 은 또한 인쇄물 
+이 튜닝 연습은 모서리의 품질을 직접적으로 향상시키지만 좋은 pressure advance 또한 인쇄물 
 전체에 노즐 흘러내림을 감소시킨다는 점에서 가치가 있습니다.
 
 이 테스트가 완료되면 구성 파일의 `[extruder]` 섹션에서 
@@ -73,9 +73,9 @@ RESTART 명령은 테스트 상태를 지우고 가속 및 코너링 속도를 �
 * Pressure advance 값은 extruder, 노즐 및 필라멘트에 따라 다릅니다. 
   다른 제조사의 필라멘트나 다른 안료의 필라멘트는 상당히 다른 
   pressure advance 값을 요구하는 것이 일반적입니다.
-  따라서 프린터와 필라멘트 가 변경되면 압력 진행을 보정해야 합니다.
+  따라서 프린터와 필라멘트 가 변경되면 pressure advance을 보정해야 합니다.
 
-* 인쇄 온도와 압출 속도는 압력 진행에 영향을 줄 수 있습니다.
+* 인쇄 온도와 압출 속도는 pressure advance 에 영향을 줄 수 있습니다.
   Pressure advance 를 조정하기 전에 
   [extruder rotation_distance](Rotation_Distance.md#calibrating-rotation_distance-on-extruders) 및 
   [nozzle temperature](http://reprap.org/wiki/Triffid_Hunter%27s_Calibration_Guide#Nozzle_Temperature) 를 
@@ -91,7 +91,7 @@ RESTART 명령은 테스트 상태를 지우고 가속 및 코너링 속도를 �
 * 테스트 인쇄는 각 모서리에서 다른 동작을 보이는 것이 일반적입니다.
   종종 슬라이서는 한 모서리에서 레이어를 변경하도록 정렬하여 해당 모서리가 
   나머지 세 모서리와 크게 다를 수 있습니다. (제봉선 설정)
-  이 경우 해당 모서리를 무시하고 다른 세 모서리를 사용하여 압력 진행을 조정하십시오.
+  이 경우 해당 모서리를 무시하고 다른 세 모서리를 사용하여 pressure advance 을 조정하십시오.
   나머지 모서리도 약간씩 달라지는 것이 일반적입니다. (이는 특정 방향의 코너링에 프린터 
   프레임이 반응하는 방식의 작은 차이로 인해 발생할 수 있습니다.)
   나머지 모든 모서리에 잘 맞는 값을 선택하십시오.
