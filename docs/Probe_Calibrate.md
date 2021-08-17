@@ -1,102 +1,91 @@
-# Probe calibration
+# 프로브 보정
 
-This document describes the method for calibrating the x, y, and z
-offsets of an "automatic z probe" in Klipper. This is useful for users
-that have a `[probe]` or `[bltouch]` section in their config file.
+이 문서는 Klipper 에서 "automatic z probe" 의 x, y 및 
+z 오프셋을 보정하는 방법을 설명합니다. 이것은 config 파일에 
+`[probe]` 또는 `[bltouch]` 섹션이 있는 사용자에게 유용합니다.
 
-## Calibrating probe X and Y offsets
+## 프로브 X 및 Y 오프셋 보정
 
-To calibrate the X and Y offset, navigate to the OctoPrint "Control"
-tab, home the printer, and then use the OctoPrint jogging buttons to
-move the head to a position near the center of the bed.
+X 및 Y 오프셋을 보정하려면 OctoPrint "Control" 탭으로 이동하여 
+프린터를 홈으로 이동한 다음 OctoPrint 조깅 버튼을 사용하여 헤드를 
+BED 중앙 근처 위치로 이동합니다.
 
-Place a piece of blue painters tape (or similar) on the bed underneath
-the probe. Navigate to the OctoPrint "Terminal" tab and issue a PROBE
-command:
+프로브 아래의 BED 에 청색 테이프 (또는 이와 유사한 것) 조각을 놓습니다.
+OctoPrint "터미널" 탭으로 이동하여 PROBE 명령을 실행합니다:
 ```
 PROBE
 ```
-Place a mark on the tape directly under where the probe is (or use a
-similar method to note the location on the bed).
+프로브가 있는 곳 바로 아래에 있는 테이프에 표시를 하십시오 
+(또는 유사한 방법을 사용하여 BED 위의 위치를 기록해 두십시오).
 
-Issue a `GET_POSITION` command and record the toolhead XY location
-reported by that command. For example if one sees:
+'GET_POSITION' 명령을 실행하고 해당 명령에 의해 보고된 툴 헤드 
+XY 위치를 기록합니다. 예를 들어 다음과 같은 경우:
 ```
 Recv: // toolhead: X:46.500000 Y:27.000000 Z:15.000000 E:0.000000
 ```
-then one would record a probe X position of 46.5 and probe Y position
-of 27.
+그러면 프로브 X 위치가 46.5이고 프로브 Y 위치가 27 로 기록됩니다.
 
-After recording the probe position, issue a series of G1 commands
-until the nozzle is directly above the mark on the bed. For example,
-one might issue:
+프로브 위치를 기록한 후 노즐이 BED 의 표시 바로 위에 올 때까지 일련의 
+G1 명령을 실행합니다. 예를 들어 다음을 발행할 수 있습니다.
 ```
 G1 F300 X57 Y30 Z15
 ```
-to move the nozzle to an X position of 57 and Y of 30. Once one finds
-the position directly above the mark, use the `GET_POSITION` command
-to report that position. This is the nozzle position.
+노즐을 57 의 X 위치와 30 의 Y 위치로 이동합니다. 표시 바로 위의 위치를 
+찾으면 `GET_POSITION` 명령을 사용하여 해당 위치를 보고합니다.
+이것이 노즐 위치입니다.
 
-The x_offset is then the `nozzle_x_position - probe_x_position` and
-y_offset is similarly the `nozzle_y_position - probe_y_position`.
-Update the printer.cfg file with the given values, remove the
-tape/marks from the bed, and then issue a `RESTART` command so that
-the new values take effect.
+x_offset은 `nozzle_x_position - probe_x_position` 이고 
+y_offset은 유사하게 `nozzle_y_position - probe_y_position` 입니다.
+주어진 값으로 printer.cfg 파일을 업데이트하고 BED 에서 테이프/마크를 제거한 
+다음 `RESTART` 명령을 실행하여 새 값이 적용되도록 합니다.
 
-## Calibrating probe Z offset
+## 프로브 Z 오프셋 보정
 
-Providing an accurate probe z_offset is critical to obtaining high
-quality prints. The z_offset is the distance between the nozzle and
-bed when the probe triggers. The Klipper `PROBE_CALIBRATE` tool can be
-used to obtain this value - it will run an automatic probe to measure
-the probe's Z trigger position and then start a manual probe to obtain
-the nozzle Z height. The probe z_offset will then be calculated from
-these measurements.
+정확한 프로브 z_offset 을 제공하는 것은 고품질 인쇄물을 얻는 데 중요합니다.
+z_offset 은 프로브가 트리거될 때 노즐과 베드 사이의 거리입니다.
+Klipper `PROBE_CALIBRATE` 도구를 사용하여 이 값을 얻을 수 있습니다. 
+자동 프로브를 실행하여 프로브의 Z 트리거 위치를 측정한 다음 수동 프로브를 
+시작하여 노즐 Z 높이를 얻을 수 있습니다. 그러면 프로브 z_offset 이 이러한 
+측정값에서 계산됩니다.
 
-Start by homing the printer and then move the head to a position near
-the center of the bed. Navigate to the OctoPrint terminal tab and run
-the `PROBE_CALIBRATE` command to start the tool.
+프린터를 원점으로 이동하여 시작한 다음 헤드를 BED 중앙 근처의 위치로 이동합니다.
+OctoPrint terminal 탭으로 이동하고 `PROBE_CALIBRATE` 명령을 실행합니다.
 
-This tool will perform an automatic probe, then lift the head, move
-the nozzle over the location of the probe point, and start the manual
-probe tool. If the nozzle does not move to a position above the
-automatic probe point, then `ABORT` the manual probe tool and perform
-the XY probe offset calibration described above.
+이 도구는 자동 프로브를 수행한 다음 헤드를 들어 올리고 프로브 포인트 위치 
+위로 노즐을 이동하고 수동 프로브 도구를 시작합니다. 노즐이 자동 프로브 포인트 
+위의 위치로 이동하지 않으면 수동 프로브 도구를 `ABORT` 하고 위에서 설명한 
+XY 프로브 오프셋 보정을 수행합니다.
 
-Once the manual probe tool starts, follow the steps described at
-["the paper test"](Bed_Level.md#the-paper-test)) to determine the
-actual distance between the nozzle and bed at the given location. Once
-those steps are complete one can `ACCEPT` the position and save the
-results to the config file with:
+수동 프로브 도구가 시작되면 ["the paper test"](Bed_Level.md#the-paper-test)) 에 
+설명된 단계에 따라 주어진 위치에서 노즐과 베드 사이의 실제 거리를 결정합니다.
+
+이러한 단계가 완료되면 위치를 `ACCEPT` 하고 다음을 사용하여 config 파일에 
+결과를 저장할 수 있습니다.
+
 ```
 SAVE_CONFIG
 ```
 
-Note that if a change is made to the printer's motion system, hotend
-position, or probe location then it will invalidate the results of
-PROBE_CALIBRATE.
+프린터의 모션 시스템, 핫엔드 위치 또는 프로브 위치가 변경되면 
+PROBE_CALIBRATE 의 결과가 무효화됩니다.
 
-If the probe has an X or Y offset and the bed tilt is changed (eg, by
-adjusting bed screws, running DELTA_CALIBRATE, running Z_TILT_ADJUST,
-running QUAD_GANTRY_LEVEL, or similar) then it will invalidate the
-results of PROBE_CALIBRATE. After making any of the above adjustments
-it will be necessary to run PROBE_CALIBRATE again.
+프로브에 X 또는 Y 오프셋이 있고 베드 기울기가 변경되면 
+(예: 베드 나사 조정, DELTA_CALIBRATE 실행, Z_TILT_ADJUST 실행, 
+QUAD_GANTRY_LEVEL 실행 등) PROBE_CALIBRATE의 결과가 무효화됩니다.
+위의 조정을 수행한 후에는 PROBE_CALIBRATE를 다시 실행해야 합니다.
 
-If the results of PROBE_CALIBRATE are invalidated, then any previous
-[bed mesh](Bed_Mesh.md) results that were obtained using the probe are
-also invalidated - it will be necessary to rerun BED_MESH_CALIBRATE
-after recalibrating the probe.
+PROBE_CALIBRATE의 결과가 무효화되면 프로브를 사용하여 얻은 이전 
+[bed mesh](Bed_Mesh.md) 결과도 무효화됩니다. 프로브를 재교정한 후 
+BED_MESH_CALIBRATE 를 다시 실행해야 합니다.
 
-## Repeatability check
+## 반복성 검사
 
-After calibrating the probe X, Y, and Z offsets it is a good idea to
-verify that the probe provides repeatable results. Start by homing the
-printer and then move the head to a position near the center of the
-bed. Navigate to the OctoPrint terminal tab and run the
-`PROBE_ACCURACY` command.
+프로브 X, Y 및 Z 오프셋을 보정한 후 프로브가 반복 가능한 결과를 
+제공하는지 확인하는 것이 좋습니다. 프린터를 원점으로 이동하여 
+시작한 다음 헤드를 BED 중앙 근처의 위치로 이동합니다.
+OctoPrint 터미널 탭으로 이동하여 `PROBE_ACCURACY` 명령을 실행합니다.
 
-This command will run the probe ten times and produce output similar
-to the following:
+이 명령은 프로브를 10번 실행하고 다음과 유사한 출력을 생성합니다.:
 ```
 Recv: // probe accuracy: at X:0.000 Y:0.000 Z:10.000
 Recv: // and read 10 times with speed of 5 mm/s
@@ -113,91 +102,74 @@ Recv: // probe at -0.003,0.005 is z=2.506948
 Recv: // probe accuracy results: maximum 2.519448, minimum 2.506948, range 0.012500, average 2.513198, median 2.513198, standard deviation 0.006250
 ```
 
-Ideally the tool will report an identical maximum and minimum value.
-(That is, ideally the probe obtains an identical result on all ten
-probes.) However, it's normal for the minimum and maximum values to
-differ by one Z "step distance" or up to 5 microns (.005mm). A "step
-distance" is
-`rotation_distance/(full_steps_per_rotation*microsteps)`. The distance
-between the minimum and the maximum value is called the range. So, in
-the above example, since the printer uses a Z step distance of .0125,
-a range of 0.012500 would be considered normal.
+이상적으로 도구는 동일한 최대값과 최소값을 보고합니다.
+(즉, 이상적으로는 프로브가 10개의 모든 프로브에서 동일한 결과를 얻습니다.)
+그러나 최소값과 최대값이 하나의 Z "step distance" 또는 최대 
+5미크론 (.005mm) 만큼 다른 것은 정상입니다.
+"step distance" 는 `rotation_distance/(full_steps_per_rotation*microsteps)` 입니다.
+최소값과 최대값 사이의 거리를 범위라고 합니다. 따라서 위의 예에서 프린터는 
+.0125의 Z tep distance 를 사용하므로 0.012500의 범위는 정상으로 간주됩니다.
 
-If the results of the test show a range value that is greater than 25
-microns (.025mm) then the probe does not have sufficient accuracy for
-typical bed leveling procedures. It may be possible to tune the probe
-speed and/or probe start height to improve the repeatability of the
-probe. The `PROBE_ACCURACY` command allows one to run tests with
-different parameters to see their impact - see the
-[G-Codes document](G-Codes.md) for further details. If the probe
-generally obtains repeatable results but has an occasional outlier,
-then it may be possible to account for that by using multiple samples
-on each probe - read the description of the probe `samples` config
-parameters in the [config reference](Config_Reference.md#probe) for
-more details.
+테스트 결과가 25 미크론 (0.025mm) 보다 큰 범위 값을 나타내면 프로브가 
+일반적인 베드 레벨링 절차에 대한 정확도가 충분하지 않은 것입니다.
+프로브의 반복성을 향상시키기 위해 프로브 속도 및/또는 프로브 시작 높이를 
+조정할 수 있습니다. `PROBE_ACCURACY` 명령을 사용하면 다른 매개변수로 
+테스트를 실행하여 영향을 확인할 수 있습니다. 자세한 내용은 
+[G-Codes document](G-Codes.md)를 참조하세요.
+프로브가 일반적으로 반복 가능한 결과를 얻지만 가끔 이상값이 있는 경우 
+각 프로브에서 여러 샘플을 사용하여 이를 설명할 수 있습니다.
+자세한 내용은 [config reference](Config_Reference.md#probe) 에서 
+프로브 `samples` config 매개변수에 대한 설명을 읽어보세요.
 
-If new probe speed, samples count, or other settings are needed, then
-update the printer.cfg file and issue a `RESTART` command. If so, it
-is a good idea to
-[calibrate the z_offset](#calibrating-probe-z-offset) again. If
-repeatable results can not be obtained then don't use the probe for
-bed leveling. Klipper has several manual probing tools that can be
-used instead - see the [Bed Level document](Bed_Level.md) for further
-details.
+새 프로브 속도, 샘플 수 또는 기타 설정이 필요한 경우, printer.cfg 파일을 
+업데이트하고 `RESTART` 명령을 실행하십시오. 그렇다면 다시 
+[calibrate the z_offset](#calibrating-probe-z-offset)하는 것이 좋습니다.
+반복 가능한 결과를 얻을 수 없으면 베드 레벨링에 프로브를 사용하지 마십시오.
+Klipper 에는 대신 사용할 수 있는 여러 수동 프로빙 도구가 있습니다. 
+자세한 내용은 [Bed Level document](Bed_Level.md)를 참조하세요.
 
-## Location Bias Check
+## 위치 쏠림 점검
 
-Some probes can have a systemic bias that corrupts the results of the
-probe at certain toolhead locations. For example, if the probe mount
-tilts slightly when moving along the Y axis then it could result in
-the probe reporting biased results at different Y positions.
+일부 프로브에는 특정 툴 헤드 위치에서 프로브의 결과를 손상시키는 
+쏠림이 있을 수 있습니다. 예를 들어 Y축을 따라 이동할 때 프로브 
+마운트가 약간 기울어지면 프로브가 다른 Y 위치에서 쏠림을 보고할 수 있습니다.
 
-This is a common issue with probes on delta printers, however it can
-occur on all printers.
+이것은 델타 프린터의 프로브에서 일반적인 문제이지만 모든 프린터에서 발생할 수 있습니다.
 
-One can check for a location bias by using the `PROBE_CALIBRATE`
-command to measuring the probe z_offset at various X and Y locations.
-Ideally, the probe z_offset would be a constant value at every printer
-location.
+다양한 X 및 Y 위치에서 프로브 z_offset을 측정하기 위해 
+`PROBE_CALIBRATE` 명령을 사용하여 위치 쏠림을 확인할 수 있습니다.
+이상적으로 프로브 z_offset 은 모든 프린터 위치에서 일정한 값입니다.
 
-For delta printers, try measuring the z_offset at a position near the
-A tower, at a position near the B tower, and at a position near the C
-tower. For cartesian, corexy, and similar printers, try measuring the
-z_offset at positions near the four corners of the bed.
+델타 프린터의 경우 A 타워 근처 위치, B 타워 근처 위치 및 C 타워 
+근처 위치에서 z_offset 을 측정해 보십시오. 직교, corexy 및 이와 유사한 
+프린터의 경우 BED 의 네 모서리 근처 위치에서 z_offset 을 측정해 보십시오.
 
-Before starting this test, first calibrate the probe X, Y, and Z
-offsets as described at the beginning of this document. Then home the
-printer and navigate to the first XY position. Follow the steps at
-[calibrating probe Z offset](#calibrating-probe-z-offset) to run the
-`PROBE_CALIBRATE` command, `TESTZ` commands, and `ACCEPT` command, but
-do not run `SAVE_CONFIG`. Note the reported z_offset found. Then
-navigate to the other XY positions, repeat these `PROBE_CALIBRATE`
-steps, and note the reported z_offset.
+이 테스트를 시작하기 전에 먼저 이 문서의 시작 부분에 설명된 대로 
+프로브 X, Y 및 Z 오프셋을 보정하십시오. 그런 다음 프린터를 홈으로 이동하고 
+첫 번째 XY 위치로 이동합니다. 
+[calibrating probe Z offset](#calibrating-probe-z-offset) 의 
+순서에 따라 `PROBE_CALIBRATE` 명령, `TESTZ` 명령 및 `ACCEPT` 명령을 
+실행하되 `SAVE_CONFIG`는 실행하지 마십시오. 보고된 z_offset 이 발견되었음을 
+확인합니다. 그런 다음 다른 XY 위치로 이동하여 이 `PROBE_CALIBRATE` 
+단계를 반복하고 보고된 z_offset을 확인합니다.
 
-If the difference between the minimum reported z_offset and the
-maximum reported z_offset is greater than 25 microns (.025mm) then the
-probe is not suitable for typical bed leveling procedures. See the
-[Bed Level document](Bed_Level.md) for manual probe alternatives.
+보고된 최소 z_offset 과 최대 보고된 z_offset 간의 차이가 
+25미크론 (.025mm) 보다 크면 프로브는 일반적인 베드 레벨링 절차에 적합하지 않습니다.
+수동 프로브 대안은 [Bed Level document](Bed_Level.md)를 참조하십시오.
 
-## Temperature Bias
+## 온도 편향
 
-Many probes have a systemic bias when probing at different
-temperatures. For example, the probe may consistently trigger at a
-lower height when the probe is at a higher temperature.
+많은 프로브는 다양한 온도에서 프로빙할 때 편향성이 있습니다. 예를 들어, 프로브가 
+더 높은 온도에 있을 때 프로브가 더 낮은 높이에서 지속적으로 트리거될 수 있습니다.
 
-It is recommended to run the bed leveling tools at a consistent
-temperature to account for this bias. For example, either always run
-the tools when the printer is at room temperature, or always run the
-tools after the printer has obtained a consistent print temperature.
-In either case, it is a good idea to wait several minutes after the
-desired temperature is reached, so that the printer apparatus is
-consistently at the desired temperature.
+이러한 편향을 설명하기 위해 일정한 온도에서 베드 레벨링 도구를 실행하는 것이 좋습니다.
+예를 들어, 프린터가 실온에 있을 때 항상 도구를 실행하거나 프린터가 일정한 인쇄 온도를 
+얻은 후에 항상 도구를 실행하십시오. 두 경우 모두 원하는 온도에 도달한 후 몇 분 정도 
+기다리면 프린터 장치가 원하는 온도로 일정하게 유지됩니다.
 
-To check for a temperature bias, start with the printer at room
-temperature and then home the printer, move the head to a position
-near the center of the bed, and run the `PROBE_ACCURACY` command. Note
-the results. Then, without homing or disabling the stepper motors,
-heat the printer nozzle and bed to printing temperature, and run the
-`PROBE_ACCURACY` command again. Ideally, the command will report
-identical results. As above, if the probe does have a temperature bias
-then be careful to always use the probe at a consistent temperature.
+온도 편향을 확인하려면 프린터를 실온에서 시작한 다음 프린터를 홈으로 이동하고 
+헤드를 BED 중앙에 가까운 위치로 이동한 다음 `PROBE_ACCURACY` 명령을 실행하고
+결과를 기록해 두십시오. 그런 다음 원점 복귀 또는 스테퍼 모터 비활성화 없이 프린터 
+노즐과 베드를 인쇄 온도로 가열하고 `PROBE_ACCURACY` 명령을 다시 실행하십시오.
+이상적으로는 명령이 동일한 결과를 보고합니다. 위와 같이 프로브에 온도 편향이 있는 
+경우 항상 일정한 온도에서 프로브를 사용하도록 주의하십시오.
