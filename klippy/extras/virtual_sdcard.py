@@ -167,7 +167,7 @@ class VirtualSD:
         filename = gcmd.get_raw_command_parameters().strip()
         if filename.startswith('/'):
             filename = filename[1:]
-        self._load_file(gcmd, filename)
+        self._load_file(gcmd, filename, check_subdirs=True)
     def _load_file(self, gcmd, filename, check_subdirs=False):
         files = self.get_file_list(check_subdirs)
         flist = [f[0] for f in files]
